@@ -26,7 +26,9 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					light: 'hsl(var(--primary-light))',
+					lighter: 'hsl(var(--primary-lighter))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -62,6 +64,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			backgroundImage: {
+				'gradient-court': 'var(--gradient-court)',
+				'gradient-ball': 'var(--gradient-ball)',
+				'gradient-hero': 'var(--gradient-hero)'
+			},
+			boxShadow: {
+				'court': 'var(--shadow-court)',
+				'card-tennis': 'var(--shadow-card)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
