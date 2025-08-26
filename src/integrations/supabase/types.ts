@@ -14,7 +14,240 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clubs: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      ladders: {
+        Row: {
+          club_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          type: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          type: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ladders_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          created_at: string
+          id: string
+          ladder_id: string
+          match_date: string
+          player1_elo_after: number
+          player1_elo_before: number
+          player1_id: string
+          player1_score: number
+          player2_elo_after: number
+          player2_elo_before: number
+          player2_id: string
+          player2_score: number
+          winner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ladder_id: string
+          match_date?: string
+          player1_elo_after: number
+          player1_elo_before: number
+          player1_id: string
+          player1_score: number
+          player2_elo_after: number
+          player2_elo_before: number
+          player2_id: string
+          player2_score: number
+          winner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ladder_id?: string
+          match_date?: string
+          player1_elo_after?: number
+          player1_elo_before?: number
+          player1_id?: string
+          player1_score?: number
+          player2_elo_after?: number
+          player2_elo_before?: number
+          player2_id?: string
+          player2_score?: number
+          winner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_ladder_id_fkey"
+            columns: ["ladder_id"]
+            isOneToOne: false
+            referencedRelation: "ladders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_player1_id_fkey"
+            columns: ["player1_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_player2_id_fkey"
+            columns: ["player2_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          club_id: string
+          created_at: string
+          elo_rating: number
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          matches_played: number
+          matches_won: number
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          elo_rating?: number
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          matches_played?: number
+          matches_won?: number
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          elo_rating?: number
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          matches_played?: number
+          matches_won?: number
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      yearly_winners: {
+        Row: {
+          created_at: string
+          final_elo_rating: number
+          id: string
+          ladder_id: string
+          matches_played: number
+          matches_won: number
+          player_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          final_elo_rating: number
+          id?: string
+          ladder_id: string
+          matches_played: number
+          matches_won: number
+          player_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          final_elo_rating?: number
+          id?: string
+          ladder_id?: string
+          matches_played?: number
+          matches_won?: number
+          player_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "yearly_winners_ladder_id_fkey"
+            columns: ["ladder_id"]
+            isOneToOne: false
+            referencedRelation: "ladders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "yearly_winners_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
