@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      club_subscriptions: {
+        Row: {
+          club_id: string
+          created_at: string
+          current_member_count: number
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          monthly_amount: number
+          plan_id: string
+          status: string
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          current_member_count?: number
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          monthly_amount: number
+          plan_id: string
+          status?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          current_member_count?: number
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          monthly_amount?: number
+          plan_id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_subscriptions_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clubs: {
         Row: {
           created_at: string
@@ -200,6 +257,65 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          features: Json | null
+          id: string
+          max_ladders: number | null
+          name: string
+          price_per_member_monthly: number
+        }
+        Insert: {
+          created_at?: string
+          features?: Json | null
+          id?: string
+          max_ladders?: number | null
+          name: string
+          price_per_member_monthly: number
+        }
+        Update: {
+          created_at?: string
+          features?: Json | null
+          id?: string
+          max_ladders?: number | null
+          name?: string
+          price_per_member_monthly?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          club_id: string
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       yearly_winners: {
         Row: {
           created_at: string
@@ -253,10 +369,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_club_admin: {
+        Args: { _club_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "club_admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -383,6 +502,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["club_admin", "user"],
+    },
   },
 } as const
