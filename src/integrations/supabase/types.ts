@@ -264,7 +264,7 @@ export type Database = {
           id: string
           max_ladders: number | null
           name: string
-          price_per_member_monthly: number
+          price_per_100_members_monthly: number
         }
         Insert: {
           created_at?: string
@@ -272,7 +272,7 @@ export type Database = {
           id?: string
           max_ladders?: number | null
           name: string
-          price_per_member_monthly: number
+          price_per_100_members_monthly: number
         }
         Update: {
           created_at?: string
@@ -280,7 +280,7 @@ export type Database = {
           id?: string
           max_ladders?: number | null
           name?: string
-          price_per_member_monthly?: number
+          price_per_100_members_monthly?: number
         }
         Relationships: []
       }
