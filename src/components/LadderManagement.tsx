@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
+import LadderParticipants from '@/components/LadderParticipants';
 
 interface Ladder {
   id: string;
@@ -132,17 +133,24 @@ export default function LadderManagement({ ladders, onLadderUpdated }: LadderMan
             <div>
               <h3 className="font-medium">{ladder.name}</h3>
               <div className="flex items-center space-x-2 mt-1">
-                <Badge variant="outline">{formatType(ladder.type)}</Badge>
-                <Badge
-                  variant={ladder.is_active ? 'default' : 'secondary'}
-                  className={
-                    ladder.is_active
-                      ? 'bg-green-100 text-green-800 border-green-200'
-                      : 'bg-gray-100 text-gray-600 border-gray-200'
-                  }
-                >
-                  {ladder.is_active ? 'Active' : 'Inactive'}
-                </Badge>
+                  <Badge variant="outline">{formatType(ladder.type)}</Badge>
+                  <Badge
+                    variant={ladder.is_active ? 'default' : 'secondary'}
+                    className={
+                      ladder.is_active
+                        ? 'bg-green-100 text-green-800 border-green-200'
+                        : 'bg-gray-100 text-gray-600 border-gray-200'
+                    }
+                  >
+                    {ladder.is_active ? 'Active' : 'Inactive'}
+                  </Badge>
+                  {ladder.is_active && (
+                    <LadderParticipants
+                      ladderId={ladder.id}
+                      ladderName={ladder.name}
+                      isClubAdmin={true}
+                    />
+                  )}
               </div>
             </div>
           </div>

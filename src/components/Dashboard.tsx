@@ -9,6 +9,7 @@ import { Trophy, Users, Activity, TrendingUp, Settings, Plus } from 'lucide-reac
 import { useClubAdmin } from '@/hooks/useClubAdmin';
 import AddLadderDialog from '@/components/AddLadderDialog';
 import LadderManagement from '@/components/LadderManagement';
+import LadderParticipationButton from '@/components/LadderParticipationButton';
 
 interface Profile {
   id: string;
@@ -249,15 +250,24 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                   <div className="grid gap-4">
                     {ladders.map((ladder) => (
                       <div key={ladder.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
+                        <div className="flex-1">
                           <h3 className="font-medium">{ladder.name}</h3>
                           <p className="text-sm text-muted-foreground capitalize">
                             {ladder.type} competition
                           </p>
                         </div>
-                        <Button variant="outline" className="hover:bg-primary hover:text-primary-foreground">
-                          View Ladder
-                        </Button>
+                        <div className="flex items-center space-x-3">
+                          <LadderParticipationButton
+                            ladderId={ladder.id}
+                            ladderName={ladder.name}
+                            playerId={profile?.id || null}
+                            variant="outline"
+                            showParticipantCount={true}
+                          />
+                          <Button variant="ghost" size="sm" className="hover:bg-primary hover:text-primary-foreground">
+                            View Details
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
