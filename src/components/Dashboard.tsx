@@ -5,7 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Session } from '@supabase/supabase-js';
-import { Trophy, Users, Activity, TrendingUp } from 'lucide-react';
+import { Trophy, Users, Activity, TrendingUp, Settings, Plus } from 'lucide-react';
+import { useClubAdmin } from '@/hooks/useClubAdmin';
+import AddLadderDialog from '@/components/AddLadderDialog';
+import LadderManagement from '@/components/LadderManagement';
 
 interface Profile {
   id: string;
@@ -28,6 +31,8 @@ interface Ladder {
   name: string;
   type: string;
   club_id: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 interface DashboardProps {
@@ -40,8 +45,10 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [club, setClub] = useState<Club | null>(null);
   const [ladders, setLadders] = useState<Ladder[]>([]);
+  const [allLadders, setAllLadders] = useState<Ladder[]>([]); // For admin view (includes inactive)
   const [rankings, setRankings] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isAdmin, loading: adminLoading } = useClubAdmin(user, profile?.club_id || null);
 
   useEffect(() => {
     fetchUserData();
@@ -56,7 +63,15 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
         .eq('user_id', user.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        // If profile doesn't exist, check if we can create one
+        if (profileError.code === 'PGRST116') {
+          console.log('Profile not found, user needs to complete signup or create profile manually');
+          // For now, we'll just show an error state
+          throw new Error('Profile not found. Please complete your registration or contact support.');
+        }
+        throw profileError;
+      }
       setProfile(profileData);
 
       // Fetch club data
@@ -78,6 +93,16 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
 
       if (laddersError) throw laddersError;
       setLadders(laddersData || []);
+
+      // Fetch all ladders for admin view (including inactive ones)
+      const { data: allLaddersData, error: allLaddersError } = await supabase
+        .from('ladders')
+        .select('*')
+        .eq('club_id', profileData.club_id)
+        .order('created_at', { ascending: false });
+
+      if (allLaddersError) throw allLaddersError;
+      setAllLadders(allLaddersData || []);
 
       // Fetch club rankings
       const { data: rankingsData, error: rankingsError } = await supabase
@@ -204,10 +229,11 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="ladders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="ladders">Ladders</TabsTrigger>
             <TabsTrigger value="rankings">Rankings</TabsTrigger>
             <TabsTrigger value="matches">Recent Matches</TabsTrigger>
+            {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="ladders" className="space-y-6">
@@ -308,6 +334,36 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
               </CardContent>
             </Card>
           </TabsContent>
+
+          {isAdmin && (
+            <TabsContent value="admin" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="h-5 w-5" />
+                        Ladder Management
+                      </CardTitle>
+                      <CardDescription>
+                        Create and manage ladders for your club
+                      </CardDescription>
+                    </div>
+                    <AddLadderDialog
+                      clubId={profile?.club_id || ''}
+                      onLadderAdded={fetchUserData}
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <LadderManagement
+                    ladders={allLadders}
+                    onLadderUpdated={fetchUserData}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
