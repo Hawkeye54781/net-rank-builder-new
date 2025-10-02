@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Session } from '@supabase/supabase-js';
-import { Trophy, Users, Activity, TrendingUp, Settings, Plus } from 'lucide-react';
+import { Trophy, Users, Activity, TrendingUp, Settings } from 'lucide-react';
 import { useClubAdmin } from '@/hooks/useClubAdmin';
 import AddLadderDialog from '@/components/AddLadderDialog';
 import LadderManagement from '@/components/LadderManagement';
-import LadderParticipationButton from '@/components/LadderParticipationButton';
+import LadderRow from '@/components/LadderRow';
 
 interface Profile {
   id: string;
@@ -43,6 +44,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ user, session, onSignOut }: DashboardProps) {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [club, setClub] = useState<Club | null>(null);
   const [ladders, setLadders] = useState<Ladder[]>([]);
@@ -249,26 +251,11 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                 {ladders.length > 0 ? (
                   <div className="grid gap-4">
                     {ladders.map((ladder) => (
-                      <div key={ladder.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <h3 className="font-medium">{ladder.name}</h3>
-                          <p className="text-sm text-muted-foreground capitalize">
-                            {ladder.type} competition
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <LadderParticipationButton
-                            ladderId={ladder.id}
-                            ladderName={ladder.name}
-                            playerId={profile?.id || null}
-                            variant="outline"
-                            showParticipantCount={true}
-                          />
-                          <Button variant="ghost" size="sm" className="hover:bg-primary hover:text-primary-foreground">
-                            View Details
-                          </Button>
-                        </div>
-                      </div>
+                      <LadderRow
+                        key={ladder.id}
+                        ladder={ladder}
+                        playerId={profile?.id || null}
+                      />
                     ))}
                   </div>
                 ) : (
