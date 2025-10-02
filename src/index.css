@@ -2,120 +2,201 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Material Design 3 Design System with Tennis Theme
+Follows MD3 specifications: https://m3.material.io/
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    /* Tennis Green Theme */
-    --primary: 87 61% 20%; /* Tennis court green */
-    --primary-foreground: 0 0% 98%;
-    --primary-light: 87 45% 35%;
-    --primary-lighter: 87 35% 45%;
-
-    --secondary: 45 30% 95%;
-    --secondary-foreground: 87 61% 20%;
-
-    --muted: 45 20% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 48 96% 89%; /* Tennis ball yellow accent */
-    --accent-foreground: 87 61% 20%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 87 61% 20%;
-
-    /* Tennis-specific gradients */
-    --gradient-court: linear-gradient(135deg, hsl(87 61% 20%), hsl(87 45% 35%));
-    --gradient-ball: linear-gradient(135deg, hsl(48 96% 89%), hsl(50 100% 80%));
-    --gradient-hero: linear-gradient(135deg, hsl(87 45% 35%), hsl(87 61% 20%));
-
-    /* Shadows */
-    --shadow-court: 0 10px 30px -10px hsl(87 61% 20% / 0.3);
-    --shadow-card: 0 4px 20px hsl(87 61% 20% / 0.1);
-
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* MD3 Surface Colors */
+    --md-sys-color-surface: 0 0% 98%; /* surface-light */
+    --md-sys-color-surface-dim: 0 0% 85%;
+    --md-sys-color-surface-bright: 0 0% 98%;
+    --md-sys-color-surface-container-lowest: 0 0% 100%;
+    --md-sys-color-surface-container-low: 0 0% 96%;
+    --md-sys-color-surface-container: 0 0% 94%;
+    --md-sys-color-surface-container-high: 0 0% 92%;
+    --md-sys-color-surface-container-highest: 0 0% 90%;
+    
+    --md-sys-color-on-surface: 87 10% 10%;
+    --md-sys-color-on-surface-variant: 87 8% 30%;
+    
+    /* MD3 Primary Colors - Tennis Court Green */
+    --md-sys-color-primary: 87 65% 25%; /* Tennis court green - increased contrast */
+    --md-sys-color-on-primary: 0 0% 100%;
+    --md-sys-color-primary-container: 87 50% 90%;
+    --md-sys-color-on-primary-container: 87 65% 15%;
+    --md-sys-color-inverse-primary: 87 55% 70%;
+    
+    /* MD3 Secondary Colors */
+    --md-sys-color-secondary: 87 35% 35%;
+    --md-sys-color-on-secondary: 0 0% 100%;
+    --md-sys-color-secondary-container: 87 30% 88%;
+    --md-sys-color-on-secondary-container: 87 35% 15%;
+    
+    /* MD3 Tertiary Colors - Tennis Ball Yellow */
+    --md-sys-color-tertiary: 48 90% 45%; /* Tennis ball yellow */
+    --md-sys-color-on-tertiary: 0 0% 10%;
+    --md-sys-color-tertiary-container: 48 100% 90%;
+    --md-sys-color-on-tertiary-container: 48 90% 20%;
+    
+    /* MD3 Error Colors */
+    --md-sys-color-error: 0 84% 60%;
+    --md-sys-color-on-error: 0 0% 100%;
+    --md-sys-color-error-container: 0 100% 95%;
+    --md-sys-color-on-error-container: 0 84% 20%;
+    
+    /* MD3 Background */
+    --md-sys-color-background: 87 20% 98%;
+    --md-sys-color-on-background: 87 10% 10%;
+    
+    /* MD3 Outline */
+    --md-sys-color-outline: 87 12% 50%;
+    --md-sys-color-outline-variant: 87 12% 80%;
+    
+    /* MD3 State Layers */
+    --md-sys-state-hover-opacity: 0.08;
+    --md-sys-state-focus-opacity: 0.12;
+    --md-sys-state-pressed-opacity: 0.12;
+    --md-sys-state-dragged-opacity: 0.16;
+    
+    /* MD3 Elevation Shadows */
+    --md-sys-elevation-0: none;
+    --md-sys-elevation-1: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+    --md-sys-elevation-2: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+    --md-sys-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.3);
+    --md-sys-elevation-4: 0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px 0px rgba(0, 0, 0, 0.3);
+    --md-sys-elevation-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3);
+    
+    /* MD3 Shape */
+    --md-sys-shape-corner-none: 0px;
+    --md-sys-shape-corner-extra-small: 4px;
+    --md-sys-shape-corner-small: 8px;
+    --md-sys-shape-corner-medium: 12px;
+    --md-sys-shape-corner-large: 16px;
+    --md-sys-shape-corner-extra-large: 28px;
+    --md-sys-shape-corner-full: 9999px;
+    
+    /* Tennis-specific gradients with proper contrast */
+    --gradient-court: linear-gradient(135deg, hsl(87 65% 25%), hsl(87 55% 35%));
+    --gradient-ball: linear-gradient(135deg, hsl(48 96% 55%), hsl(50 100% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(87 55% 35%), hsl(87 65% 25%));
+    
+    /* Legacy compatibility mappings */
+    --background: var(--md-sys-color-background);
+    --foreground: var(--md-sys-color-on-background);
+    --card: var(--md-sys-color-surface-container);
+    --card-foreground: var(--md-sys-color-on-surface);
+    --popover: var(--md-sys-color-surface-container-high);
+    --popover-foreground: var(--md-sys-color-on-surface);
+    --primary: var(--md-sys-color-primary);
+    --primary-foreground: var(--md-sys-color-on-primary);
+    --secondary: var(--md-sys-color-secondary-container);
+    --secondary-foreground: var(--md-sys-color-on-secondary-container);
+    --muted: var(--md-sys-color-surface-container-highest);
+    --muted-foreground: var(--md-sys-color-on-surface-variant);
+    --accent: var(--md-sys-color-tertiary);
+    --accent-foreground: var(--md-sys-color-on-tertiary);
+    --destructive: var(--md-sys-color-error);
+    --destructive-foreground: var(--md-sys-color-on-error);
+    --border: var(--md-sys-color-outline-variant);
+    --input: var(--md-sys-color-outline);
+    --ring: var(--md-sys-color-primary);
+    --radius: var(--md-sys-shape-corner-medium);
+    
+    /* Sidebar */
+    --sidebar-background: var(--md-sys-color-surface-container-low);
+    --sidebar-foreground: var(--md-sys-color-on-surface);
+    --sidebar-primary: var(--md-sys-color-primary);
+    --sidebar-primary-foreground: var(--md-sys-color-on-primary);
+    --sidebar-accent: var(--md-sys-color-surface-container);
+    --sidebar-accent-foreground: var(--md-sys-color-on-surface);
+    --sidebar-border: var(--md-sys-color-outline-variant);
+    --sidebar-ring: var(--md-sys-color-primary);
   }
 
   .dark {
-    /* Dark theme backgrounds */
-    --background: 0 0% 8%;
-    --foreground: 0 0% 98%;
-
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 98%;
-
-    /* Tennis Green Theme for Dark Mode */
-    --primary: 87 55% 45%; /* Lighter tennis court green for dark mode */
-    --primary-foreground: 0 0% 10%;
-    --primary-light: 87 45% 55%;
-    --primary-lighter: 87 35% 65%;
-
-    --secondary: 0 0% 18%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
-
-    --accent: 48 85% 55%; /* Brighter tennis ball yellow for dark mode */
-    --accent-foreground: 0 0% 10%;
-
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 87 55% 45%;
-
-    /* Tennis-specific gradients for dark mode */
-    --gradient-court: linear-gradient(135deg, hsl(87 55% 35%), hsl(87 45% 45%));
-    --gradient-ball: linear-gradient(135deg, hsl(48 85% 55%), hsl(50 90% 65%));
-    --gradient-hero: linear-gradient(135deg, hsl(87 45% 40%), hsl(87 55% 30%));
-
-    --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 87 55% 45%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 0 0% 18%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 87 55% 45%;
+    /* MD3 Surface Colors - Dark Mode */
+    --md-sys-color-surface: 0 0% 10%;
+    --md-sys-color-surface-dim: 0 0% 6%;
+    --md-sys-color-surface-bright: 0 0% 24%;
+    --md-sys-color-surface-container-lowest: 0 0% 4%;
+    --md-sys-color-surface-container-low: 0 0% 10%;
+    --md-sys-color-surface-container: 0 0% 12%;
+    --md-sys-color-surface-container-high: 0 0% 17%;
+    --md-sys-color-surface-container-highest: 0 0% 22%;
+    
+    --md-sys-color-on-surface: 0 0% 90%;
+    --md-sys-color-on-surface-variant: 0 0% 70%;
+    
+    /* MD3 Primary Colors - Tennis Court Green (Dark) */
+    --md-sys-color-primary: 87 70% 75%; /* Brighter for dark mode - better contrast */
+    --md-sys-color-on-primary: 87 65% 10%;
+    --md-sys-color-primary-container: 87 55% 30%;
+    --md-sys-color-on-primary-container: 87 70% 92%;
+    --md-sys-color-inverse-primary: 87 65% 25%;
+    
+    /* MD3 Secondary Colors (Dark) */
+    --md-sys-color-secondary: 87 40% 65%;
+    --md-sys-color-on-secondary: 87 35% 20%;
+    --md-sys-color-secondary-container: 87 30% 28%;
+    --md-sys-color-on-secondary-container: 87 40% 85%;
+    
+    /* MD3 Tertiary Colors - Tennis Ball Yellow (Dark) */
+    --md-sys-color-tertiary: 48 90% 65%;
+    --md-sys-color-on-tertiary: 48 90% 20%;
+    --md-sys-color-tertiary-container: 48 80% 30%;
+    --md-sys-color-on-tertiary-container: 48 95% 85%;
+    
+    /* MD3 Error Colors (Dark) */
+    --md-sys-color-error: 0 84% 70%;
+    --md-sys-color-on-error: 0 84% 20%;
+    --md-sys-color-error-container: 0 84% 30%;
+    --md-sys-color-on-error-container: 0 100% 90%;
+    
+    /* MD3 Background (Dark) */
+    --md-sys-color-background: 0 0% 8%;
+    --md-sys-color-on-background: 0 0% 90%;
+    
+    /* MD3 Outline (Dark) */
+    --md-sys-color-outline: 0 0% 40%;
+    --md-sys-color-outline-variant: 0 0% 25%;
+    
+    /* Tennis-specific gradients for dark mode with proper contrast */
+    --gradient-court: linear-gradient(135deg, hsl(87 70% 75%), hsl(87 60% 65%));
+    --gradient-ball: linear-gradient(135deg, hsl(48 90% 65%), hsl(50 95% 75%));
+    --gradient-hero: linear-gradient(135deg, hsl(87 60% 65%), hsl(87 70% 75%));
+    
+    /* Legacy compatibility mappings */
+    --background: var(--md-sys-color-background);
+    --foreground: var(--md-sys-color-on-background);
+    --card: var(--md-sys-color-surface-container);
+    --card-foreground: var(--md-sys-color-on-surface);
+    --popover: var(--md-sys-color-surface-container-high);
+    --popover-foreground: var(--md-sys-color-on-surface);
+    --primary: var(--md-sys-color-primary);
+    --primary-foreground: var(--md-sys-color-on-primary);
+    --secondary: var(--md-sys-color-secondary-container);
+    --secondary-foreground: var(--md-sys-color-on-secondary-container);
+    --muted: var(--md-sys-color-surface-container-highest);
+    --muted-foreground: var(--md-sys-color-on-surface-variant);
+    --accent: var(--md-sys-color-tertiary);
+    --accent-foreground: var(--md-sys-color-on-tertiary);
+    --destructive: var(--md-sys-color-error);
+    --destructive-foreground: var(--md-sys-color-on-error);
+    --border: var(--md-sys-color-outline-variant);
+    --input: var(--md-sys-color-outline);
+    --ring: var(--md-sys-color-primary);
+    
+    --sidebar-background: var(--md-sys-color-surface-container-low);
+    --sidebar-foreground: var(--md-sys-color-on-surface);
+    --sidebar-primary: var(--md-sys-color-primary);
+    --sidebar-primary-foreground: var(--md-sys-color-on-primary);
+    --sidebar-accent: var(--md-sys-color-surface-container);
+    --sidebar-accent-foreground: var(--md-sys-color-on-surface);
+    --sidebar-border: var(--md-sys-color-outline-variant);
+    --sidebar-ring: var(--md-sys-color-primary);
   }
 }
 

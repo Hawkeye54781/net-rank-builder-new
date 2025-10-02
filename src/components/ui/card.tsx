@@ -1,20 +1,42 @@
 import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
+// Material Design 3 Card Variants
+// https://m3.material.io/components/cards
+const cardVariants = cva(
+  "rounded-xl bg-md-surface-container text-md-on-surface transition-all duration-200",
+  {
+    variants: {
+      variant: {
+        // MD3 Elevated card
+        elevated: "shadow-md-elevation-1 hover:shadow-md-elevation-2",
+        // MD3 Filled card
+        filled: "bg-md-surface-container-highest shadow-md-elevation-0",
+        // MD3 Outlined card
+        outlined: "border border-md-outline-variant shadow-md-elevation-0 bg-md-surface",
+      },
+    },
+    defaultVariants: {
+      variant: "elevated",
+    },
+  }
+)
+
+export interface CardProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof cardVariants> {}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(cardVariants({ variant }), className)}
+      {...props}
+    />
+  )
+)
 Card.displayName = "Card"
 
 const CardHeader = React.forwardRef<
