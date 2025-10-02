@@ -11,6 +11,7 @@ import { useClubAdmin } from '@/hooks/useClubAdmin';
 import AddLadderDialog from '@/components/AddLadderDialog';
 import LadderManagement from '@/components/LadderManagement';
 import LadderRow from '@/components/LadderRow';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface Profile {
   id: string;
@@ -159,6 +160,7 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
             <span className="text-sm text-muted-foreground">
               Welcome, {profile?.first_name}!
             </span>
+            <ThemeToggle />
             <Button variant="outline" onClick={onSignOut}>
               Sign Out
             </Button>

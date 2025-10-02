@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Trophy, Users, Calendar } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface Ladder {
   id: string;
@@ -161,14 +162,16 @@ export default function LadderDetails() {
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
+          <div className="flex items-center justify-between mb-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/')}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Button>
+            <ThemeToggle />
+          </div>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-primary">{ladder.name}</h1>
@@ -182,8 +185,8 @@ export default function LadderDetails() {
                 variant={ladder.is_active ? 'default' : 'secondary'}
                 className={
                   ladder.is_active
-                    ? 'bg-green-100 text-green-800 border-green-200'
-                    : 'bg-gray-100 text-gray-600 border-gray-200'
+                    ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-800'
+                    : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
                 }
               >
                 {ladder.is_active ? 'Active' : 'Inactive'}
