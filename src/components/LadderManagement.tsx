@@ -138,8 +138,8 @@ export default function LadderManagement({ ladders, onLadderUpdated }: LadderMan
                     variant={ladder.is_active ? 'default' : 'secondary'}
                     className={
                       ladder.is_active
-                        ? 'bg-green-100 text-green-800 border-green-200'
-                        : 'bg-gray-100 text-gray-600 border-gray-200'
+                        ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-800'
+                        : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
                     }
                   >
                     {ladder.is_active ? 'Active' : 'Inactive'}
