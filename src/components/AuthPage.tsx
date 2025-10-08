@@ -108,25 +108,32 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
         description: error.message,
         variant: "destructive",
       });
-    } else if (data.user) {
-      // Create profile after signup
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            user_id: data.user.id,
-            club_id: selectedClub,
-            first_name: firstName,
-            last_name: lastName,
-            email: email,
-            phone: phone,
-          }
-        ]);
+      setLoading(false);
+      return;
+    }
+    
+    if (!data.user) {
+      toast({
+        title: "Sign Up Failed",
+        description: "Unable to create user account",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
 
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-      }
+    // Profile is automatically created by database trigger
+    // No need to manually insert into profiles table
 
+    // If email confirmation is disabled, user will be auto-logged in
+    if (data.session) {
+      toast({
+        title: "Sign Up Successful",
+        description: "Welcome to Tennis Ladder!",
+      });
+      // Auto sign in the user
+      onAuthSuccess(data.user, data.session);
+    } else {
       toast({
         title: "Sign Up Successful",
         description: "Please check your email to confirm your account",
