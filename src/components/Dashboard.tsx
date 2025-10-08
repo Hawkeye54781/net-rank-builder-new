@@ -6,10 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Session } from '@supabase/supabase-js';
-import { Trophy, Users, Activity, TrendingUp, Settings } from 'lucide-react';
+import { Trophy, Users, Activity, TrendingUp, Settings, Shield } from 'lucide-react';
 import { useClubAdmin } from '@/hooks/useClubAdmin';
 import AddLadderDialog from '@/components/AddLadderDialog';
 import LadderManagement from '@/components/LadderManagement';
+import ClubAdminManagement from '@/components/ClubAdminManagement';
 import LadderRow from '@/components/LadderRow';
 import RecordMatchDialog from '@/components/RecordMatchDialog';
 import MatchList from '@/components/MatchList';
@@ -373,6 +374,24 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                   <LadderManagement
                     ladders={allLadders}
                     onLadderUpdated={fetchUserData}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    Club Admin Management
+                  </CardTitle>
+                  <CardDescription>
+                    Manage club administrators and their permissions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ClubAdminManagement
+                    clubId={profile?.club_id || ''}
+                    currentUserId={user.id}
                   />
                 </CardContent>
               </Card>
