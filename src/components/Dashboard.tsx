@@ -11,7 +11,10 @@ import { useClubAdmin } from '@/hooks/useClubAdmin';
 import AddLadderDialog from '@/components/AddLadderDialog';
 import LadderManagement from '@/components/LadderManagement';
 import LadderRow from '@/components/LadderRow';
+import RecordMatchDialog from '@/components/RecordMatchDialog';
+import MatchList from '@/components/MatchList';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useToast } from '@/hooks/use-toast';
 
 interface Profile {
   id: string;
@@ -46,6 +49,7 @@ interface DashboardProps {
 
 export default function Dashboard({ user, session, onSignOut }: DashboardProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [club, setClub] = useState<Club | null>(null);
   const [ladders, setLadders] = useState<Ladder[]>([]);
@@ -70,9 +74,14 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
       if (profileError) {
         // If profile doesn't exist, check if we can create one
         if (profileError.code === 'PGRST116') {
-          console.log('Profile not found, user needs to complete signup or create profile manually');
-          // For now, we'll just show an error state
-          throw new Error('Profile not found. Please complete your registration or contact support.');
+          console.error('Profile not found for user:', user.id);
+          toast({
+            title: "Profile Not Found",
+            description: "Your profile is missing. Please contact support or try signing up again.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
         }
         throw profileError;
       }
@@ -158,7 +167,7 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">
-              Welcome, {profile?.first_name}!
+              Welcome, {profile?.first_name || user?.email?.split('@')[0]}!
             </span>
             <ThemeToggle />
             <Button variant="outline" onClick={onSignOut}>
@@ -317,19 +326,25 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
           <TabsContent value="matches" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Matches</CardTitle>
-                <CardDescription>
-                  Your match history and results
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Recent Matches</CardTitle>
+                    <CardDescription>
+                      Your match history and results
+                    </CardDescription>
+                  </div>
+                  <RecordMatchDialog
+                    clubId={profile?.club_id || ''}
+                    currentPlayerId={profile?.id || ''}
+                    onMatchRecorded={fetchUserData}
+                  />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No matches recorded yet.</p>
-                  <Button className="mt-4 bg-gradient-court hover:bg-primary-light">
-                    Record a Match
-                  </Button>
-                </div>
+                <MatchList
+                  clubId={profile?.club_id || ''}
+                  currentPlayerId={profile?.id || ''}
+                />
               </CardContent>
             </Card>
           </TabsContent>
