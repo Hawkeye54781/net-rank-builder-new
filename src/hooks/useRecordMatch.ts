@@ -30,17 +30,16 @@ export function useRecordMatch() {
    * Calculate ELO rating change based on match outcome
    * @param playerRating - Current ELO rating of the player
    * @param opponentRating - Current ELO rating of the opponent
-   * @param didWin - Whether the player won the match
+   * @param actualScore - Match result: 1 for win, 0.5 for tie, 0 for loss
    * @returns New ELO rating for the player
    */
   const calculateEloChange = (
     playerRating: number,
     opponentRating: number,
-    didWin: boolean
+    actualScore: number
   ): number => {
     const K_FACTOR = 32; // Standard K-factor for tennis
     const expectedScore = 1 / (1 + Math.pow(10, (opponentRating - playerRating) / 400));
-    const actualScore = didWin ? 1 : 0;
     const ratingChange = Math.round(K_FACTOR * (actualScore - expectedScore));
     
     return playerRating + ratingChange;
@@ -79,34 +78,33 @@ export function useRecordMatch() {
         throw new Error('Scores must be non-negative');
       }
 
-      if (params.player1Score === params.player2Score) {
-        throw new Error('Match cannot end in a tie');
-      }
-
       // Fetch current player data
       const [player1, player2] = await Promise.all([
         fetchPlayerData(params.player1Id),
         fetchPlayerData(params.player2Id),
       ]);
 
-      // Determine winner
-      const winnerId = params.player1Score > params.player2Score 
-        ? params.player1Id 
-        : params.player2Id;
+      // Determine winner (or null if tie)
+      const isTie = params.player1Score === params.player2Score;
+      const winnerId = isTie 
+        ? null 
+        : (params.player1Score > params.player2Score ? params.player1Id : params.player2Id);
 
-      const player1Won = winnerId === params.player1Id;
+      // For ties, both players get 0.5 score; otherwise 1 for winner, 0 for loser
+      const player1MatchScore = isTie ? 0.5 : (winnerId === params.player1Id ? 1 : 0);
+      const player2MatchScore = isTie ? 0.5 : (winnerId === params.player2Id ? 1 : 0);
 
       // Calculate new ELO ratings
       const player1EloAfter = calculateEloChange(
         player1.elo_rating,
         player2.elo_rating,
-        player1Won
+        player1MatchScore
       );
 
       const player2EloAfter = calculateEloChange(
         player2.elo_rating,
         player1.elo_rating,
-        !player1Won
+        player2MatchScore
       );
 
       // Start a transaction to ensure data consistency
@@ -134,7 +132,7 @@ export function useRecordMatch() {
         .update({
           elo_rating: player1EloAfter,
           matches_played: player1.matches_played + 1,
-          matches_won: player1.matches_won + (player1Won ? 1 : 0),
+          matches_won: player1.matches_won + (player1MatchScore === 1 ? 1 : 0),
         })
         .eq('id', params.player1Id);
 
@@ -146,7 +144,7 @@ export function useRecordMatch() {
         .update({
           elo_rating: player2EloAfter,
           matches_played: player2.matches_played + 1,
-          matches_won: player2.matches_won + (!player1Won ? 1 : 0),
+          matches_won: player2.matches_won + (player2MatchScore === 1 ? 1 : 0),
         })
         .eq('id', params.player2Id);
 

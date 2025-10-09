@@ -94,15 +94,8 @@ const recordMatchSchema = z.object({
   ladderId: z.string().min(1, 'Please select a ladder'),
   player1Id: z.string().min(1, 'Please select Player 1'),
   player2Id: z.string().min(1, 'Please select Player 2'),
-  scoreString: z
-    .string()
-    .min(1, 'Please enter match score')
-    .refine(
-      (val) => parseTennisScore(val) !== null,
-      {
-        message: 'Invalid tennis score. Enter 1-3 sets (e.g., "6-4 6-3" or "6-4 3-6 6-2")',
-      }
-    ),
+  player1Score: z.string().min(1, 'Please select Player 1 score'),
+  player2Score: z.string().min(1, 'Please select Player 2 score'),
   matchDate: z.date({
     required_error: 'Please select a match date',
   }),
@@ -111,15 +104,6 @@ const recordMatchSchema = z.object({
   {
     message: 'Players must be different',
     path: ['player2Id'],
-  }
-).refine(
-  (data) => {
-    const parsed = parseTennisScore(data.scoreString);
-    return parsed && parsed.player1Sets !== parsed.player2Sets;
-  },
-  {
-    message: 'Match cannot end in a tie',
-    path: ['scoreString'],
   }
 );
 
@@ -152,7 +136,8 @@ export default function RecordMatchDialog({
       ladderId: '',
       player1Id: currentPlayerId,
       player2Id: '',
-      scoreString: '',
+      player1Score: '',
+      player2Score: '',
       matchDate: new Date(),
     },
   });
@@ -196,17 +181,12 @@ export default function RecordMatchDialog({
 
   const onSubmit = async (data: RecordMatchFormData) => {
     try {
-      const parsed = parseTennisScore(data.scoreString);
-      if (!parsed) {
-        return; // Should not happen due to validation
-      }
-
       await recordMatch({
         ladderId: data.ladderId,
         player1Id: data.player1Id,
         player2Id: data.player2Id,
-        player1Score: parsed.player1Sets,
-        player2Score: parsed.player2Sets,
+        player1Score: parseInt(data.player1Score),
+        player2Score: parseInt(data.player2Score),
         matchDate: data.matchDate,
       });
 
@@ -214,7 +194,8 @@ export default function RecordMatchDialog({
         ladderId: '',
         player1Id: currentPlayerId,
         player2Id: '',
-        scoreString: '',
+        player1Score: '',
+        player2Score: '',
         matchDate: new Date(),
       });
       
@@ -336,25 +317,59 @@ export default function RecordMatchDialog({
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="scoreString"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Match Score</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., 6-4 6-3 or 6-4 3-6 6-2"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Enter 1-3 sets separated by spaces (e.g., "6-4 6-3").
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div>
+                <FormLabel className="mb-2 block">Match Score (Sets Won)</FormLabel>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="player1Score"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm text-muted-foreground">Player 1 Sets</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sets" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0">0</SelectItem>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="player2Score"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm text-muted-foreground">Player 2 Sets</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sets" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0">0</SelectItem>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Select the number of sets won by each player (0-2). Ties are allowed for time-limited matches.
+                </p>
+              </div>
 
               <FormField
                 control={form.control}
