@@ -9,7 +9,7 @@ interface Match {
   match_date: string;
   player1_score: number;
   player2_score: number;
-  winner_id: string;
+  winner_id: string | null; // null indicates a tie
   player1_elo_before: number;
   player2_elo_before: number;
   player1_elo_after: number;
@@ -137,7 +137,9 @@ export default function MatchList({ clubId, currentPlayerId, refreshTrigger }: M
   return (
     <div className="space-y-4">
       {matches.map((match) => {
-        const player1Won = match.winner_id === match.player1.id;
+        const isTie = match.winner_id === null;
+        const player1Won = !isTie && match.winner_id === match.player1.id;
+        const player2Won = !isTie && match.winner_id === match.player2.id;
         const player1Change = getEloChange(match.player1_elo_before, match.player1_elo_after);
         const player2Change = getEloChange(match.player2_elo_before, match.player2_elo_after);
 
@@ -154,6 +156,11 @@ export default function MatchList({ clubId, currentPlayerId, refreshTrigger }: M
                 <span className="text-sm text-muted-foreground">
                   {format(new Date(match.match_date), 'MMM d, yyyy')}
                 </span>
+                {isTie && (
+                  <Badge variant="secondary" className="text-xs">
+                    Tie
+                  </Badge>
+                )}
               </div>
             </div>
 
@@ -193,7 +200,7 @@ export default function MatchList({ clubId, currentPlayerId, refreshTrigger }: M
               {/* Player 2 */}
               <div className="text-left">
                 <div className="flex items-center gap-2 mb-1">
-                  {!player1Won && (
+                  {player2Won && (
                     <Badge className="text-xs bg-gradient-court">
                       Winner
                     </Badge>
