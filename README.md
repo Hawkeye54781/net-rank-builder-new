@@ -1,22 +1,8 @@
-# Welcome to your Lovable project
+# Net Rank Builder
 
-## Project info
+A professional tennis ladder ranking system with ELO ratings for tennis clubs.
 
-**URL**: https://lovable.dev/projects/7e0764c4-a686-4595-a612-433ab6e9e5e7
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/7e0764c4-a686-4595-a612-433ab6e9e5e7) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting Started
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -60,14 +46,14 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/7e0764c4-a686-4595-a612-433ab6e9e5e7) and click on Share -> Publish.
+This project is deployed on Vercel. Any push to the `main` branch will automatically trigger a new deployment.
 
-## Can I connect a custom domain to my Lovable project?
+## Features
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Tennis ladder ranking system
+- ELO-based rating calculations
+- Club and player management
+- Match recording and history
+- Real-time rankings updates
