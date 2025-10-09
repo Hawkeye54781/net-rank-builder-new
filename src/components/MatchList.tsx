@@ -32,19 +32,20 @@ interface Match {
 interface MatchListProps {
   clubId: string;
   currentPlayerId: string;
+  refreshTrigger?: number;
 }
 
 /**
  * Component to display recent matches with clean formatting
  * Implements separation of concerns with dedicated formatting functions
  */
-export default function MatchList({ clubId, currentPlayerId }: MatchListProps) {
+export default function MatchList({ clubId, currentPlayerId, refreshTrigger }: MatchListProps) {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchMatches();
-  }, [clubId]);
+  }, [clubId, refreshTrigger]);
 
   const fetchMatches = async () => {
     setLoading(true);

@@ -57,6 +57,7 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
   const [allLadders, setAllLadders] = useState<Ladder[]>([]); // For admin view (includes inactive)
   const [rankings, setRankings] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [matchRefreshTrigger, setMatchRefreshTrigger] = useState(0);
   const { isAdmin, loading: adminLoading } = useClubAdmin(user, profile?.club_id || null);
 
   useEffect(() => {
@@ -337,7 +338,10 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                   <RecordMatchDialog
                     clubId={profile?.club_id || ''}
                     currentPlayerId={profile?.id || ''}
-                    onMatchRecorded={fetchUserData}
+                    onMatchRecorded={() => {
+                      fetchUserData();
+                      setMatchRefreshTrigger(prev => prev + 1);
+                    }}
                   />
                 </div>
               </CardHeader>
@@ -345,6 +349,7 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                 <MatchList
                   clubId={profile?.club_id || ''}
                   currentPlayerId={profile?.id || ''}
+                  refreshTrigger={matchRefreshTrigger}
                 />
               </CardContent>
             </Card>
