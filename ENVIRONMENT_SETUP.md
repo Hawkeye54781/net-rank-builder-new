@@ -1,19 +1,20 @@
 # Environment Setup - Dev/Test & Production
 
 ## Overview
-This project now has separate Supabase environments for development/testing and production.
+This project uses Docker for local development and Supabase Cloud for production.
 
 ## Environments
 
-### 🧪 Development/Test Environment (Current for localhost)
-- **Project ID**: `hftadlemirrdkdnnoahk`
-- **Project Name**: Tennis Club Ladder Test
-- **URL**: https://hftadlemirrdkdnnoahk.supabase.co
-- **Dashboard**: https://supabase.com/dashboard/project/hftadlemirrdkdnnoahk
+### 🐳 Local Development (Docker - Current)
+- **Type**: Docker containers (via Supabase CLI)
+- **URL**: http://127.0.0.1:54321
+- **Studio**: http://127.0.0.1:54323
+- **Database**: postgresql://postgres:postgres@127.0.0.1:54322/postgres
 - **Use Case**: Local development and testing
 - **Configuration File**: `.env` (active for localhost)
+- **Data**: Isolated, can be reset anytime with `supabase db reset`
 
-### 🚀 Production Environment
+### 🚀 Production Environment (Cloud)
 - **Project ID**: `kpizlvfvwazvpkuncxfq`
 - **Project Name**: Tennis Club Ladder
 - **URL**: https://kpizlvfvwazvpkuncxfq.supabase.co
@@ -21,15 +22,22 @@ This project now has separate Supabase environments for development/testing and 
 - **Use Case**: Live production application
 - **Configuration File**: `.env.production` (backup reference)
 
+### 🧪 Cloud Test Environment (Optional)
+- **Project ID**: `hftadlemirrdkdnnoahk`
+- **Project Name**: Tennis Club Ladder Test
+- **URL**: https://hftadlemirrdkdnnoahk.supabase.co
+- **Use Case**: Cloud-based testing/staging (optional)
+- **Configuration File**: `.env.test`
+
 ## Configuration Files
 
-### `.env` - Development (Active)
-Currently points to the **test environment**. This is used when running the app locally.
+### `.env` - Local Development (Active)
+Currently points to **Docker local development**. This is used when running the app locally.
 
 ```env
-VITE_SUPABASE_PROJECT_ID="hftadlemirrdkdnnoahk"
-VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbG..."
-VITE_SUPABASE_URL="https://hftadlemirrdkdnnoahk.supabase.co"
+VITE_SUPABASE_PROJECT_ID="local"
+VITE_SUPABASE_PUBLISHABLE_KEY="sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH"
+VITE_SUPABASE_URL="http://127.0.0.1:54321"
 ```
 
 ### `.env.production` - Production Backup
@@ -39,6 +47,15 @@ Contains production credentials for reference. Use these when you need to deploy
 VITE_SUPABASE_PROJECT_ID="kpizlvfvwazvpkuncxfq"
 VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbG..."
 VITE_SUPABASE_URL="https://kpizlvfvwazvpkuncxfq.supabase.co"
+```
+
+### `.env.test` - Cloud Test Backup
+Contains cloud test environment credentials (optional).
+
+```env
+VITE_SUPABASE_PROJECT_ID="hftadlemirrdkdnnoahk"
+VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbG..."
+VITE_SUPABASE_URL="https://hftadlemirrdkdnnoahk.supabase.co"
 ```
 
 ## Database Schema
@@ -60,69 +77,93 @@ The test database includes sample data from migrations:
 
 ## Working with Environments
 
-### Switching to Test Environment (for local dev)
+### Local Development (Default)
 ```bash
-# Already configured! Just use:
+# Make sure Docker is running
+# Start local Supabase (if not already running)
+supabase start
+
+# Run your app
 npm run dev
+
+# Access Supabase Studio (database UI)
+# Open: http://127.0.0.1:54323
 ```
 
-### Switching to Production (for deployment)
+### Resetting Local Database
 ```bash
-# Copy production credentials to .env
+# Reset and reapply all migrations (fresh start)
+supabase db reset
+
+# This will:
+# - Drop all data
+# - Reapply all migrations from scratch
+# - Perfect for testing migrations or starting fresh
+```
+
+### Deploying to Production
+```bash
+# 1. Copy production credentials to .env
 Copy-Item .env.production .env
 
-# Or on Unix/Mac:
-# cp .env.production .env
+# 2. Build your app
+npm run build
+
+# 3. Deploy (e.g., to Vercel, Netlify, etc.)
+# Make sure to set environment variables in your hosting platform
+
+# 4. Switch back to local dev
+Copy-Item .env.example .env
+# Then update with local Docker credentials
 ```
 
-### Switching Supabase CLI Context
-```bash
-# Link to test
-supabase link --project-ref hftadlemirrdkdnnoahk
-
-# Link to production
-supabase link --project-ref kpizlvfvwazvpkuncxfq
-```
-
-### Applying New Migrations
-
-When you create new migrations, apply them to both environments:
+### Creating and Applying Migrations
 
 ```bash
-# Apply to test (currently linked)
-supabase db push
+# Create a new migration
+supabase migration new your_migration_name
 
-# Switch to production and apply
+# Edit the generated .sql file in supabase/migrations/
+
+# Apply to local database
+supabase db reset  # Reapplies all migrations
+# OR
+supabase migration up  # Applies only new migrations
+
+# When ready for production, apply to production database
 supabase link --project-ref kpizlvfvwazvpkuncxfq
 supabase db push
-
-# Switch back to test
-supabase link --project-ref hftadlemirrdkdnnoahk
 ```
 
-## Getting Started with Test Environment
+## Getting Started with Local Development
 
-The test database has the schema but no user data. To get started:
+Your local database has the schema and sample clubs from migrations. To get started:
 
-1. **Run your app locally**: `npm run dev`
-2. **Sign up** through your app's auth flow
-3. **Create test data** (clubs, ladders, matches) as needed
+1. **Start Supabase** (if not running): `supabase start`
+2. **Run your app**: `npm run dev`
+3. **Sign up** through your app's auth flow (creates profile automatically via trigger)
+4. **Create test data** (ladders, matches) as needed
+5. **Reset database anytime**: `supabase db reset` for a fresh start
 
 ## Important Notes
 
-⚠️ **Never commit `.env` files to version control!** - Make sure `.env` and `.env.production` are in `.gitignore`
+⚠️ **Never commit `.env` files to version control!** - `.env`, `.env.production`, and `.env.test` are gitignored
 
-⚠️ **Free Tier Limits** - Both projects are on Supabase free tier. Monitor usage in the dashboards.
+🐳 **Docker Required** - Local development requires Docker Desktop to be running
 
-⚠️ **Data Isolation** - Changes in test won't affect production and vice versa.
+🔄 **Fresh Start Anytime** - Use `supabase db reset` to wipe local data and reapply migrations
+
+⚠️ **Production is Sacred** - Local Docker changes never affect production data
 
 ## Quick Reference
 
 | Action | Command |
-|--------|---------|
-| View all projects | `supabase projects list` |
-| Check current link | `supabase projects list` (look for ●) |
-| Link to test | `supabase link --project-ref hftadlemirrdkdnnoahk` |
-| Link to prod | `supabase link --project-ref kpizlvfvwazvpkuncxfq` |
-| Apply migrations | `supabase db push` |
-| View API keys | `supabase projects api-keys` |
+|--------|---------|  
+| Start local Supabase | `supabase start` |
+| Stop local Supabase | `supabase stop` |
+| Reset local database | `supabase db reset` |
+| View local status | `supabase status` |
+| Open Supabase Studio | `http://127.0.0.1:54323` |
+| Create migration | `supabase migration new <name>` |
+| Apply to production | `supabase link --project-ref kpizlvfvwazvpkuncxfq && supabase db push` |
+| View local logs | `supabase logs` |
