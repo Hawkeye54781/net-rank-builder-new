@@ -318,21 +318,23 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
           {activeView === 'matches' && (
             <Card>
               <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
                     <CardTitle>Recent Matches</CardTitle>
                     <CardDescription>
                       Your match history and results
                     </CardDescription>
                   </div>
-                  <RecordMatchDialog
-                    clubId={profile.club_id}
-                    currentPlayerId={profile.id}
-                    onMatchRecorded={() => {
-                      fetchUserProfile();
-                      setMatchRefreshTrigger(prev => prev + 1);
-                    }}
-                  />
+                  <div className="flex-shrink-0">
+                    <RecordMatchDialog
+                      clubId={profile.club_id}
+                      currentPlayerId={profile.id}
+                      onMatchRecorded={() => {
+                        fetchUserProfile();
+                        setMatchRefreshTrigger(prev => prev + 1);
+                      }}
+                    />
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>

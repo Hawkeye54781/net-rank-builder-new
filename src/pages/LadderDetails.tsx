@@ -244,20 +244,22 @@ export default function LadderDetails() {
         {/* Participants Rankings */}
         <Card>
           <CardHeader className="pb-4">
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-              <div className="flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
                 <CardTitle className="text-lg sm:text-xl mb-2">Rankings</CardTitle>
                 <CardDescription>
                   {participants.length} {participants.length === 1 ? 'player' : 'players'} competing
                 </CardDescription>
               </div>
               {user && userProfileId && ladder.is_active && (
-                <RecordMatchDialog
-                  clubId={ladder.club_id}
-                  currentPlayerId={userProfileId}
-                  defaultLadderId={ladder.id}
-                  onMatchRecorded={fetchLadderDetails}
-                />
+                <div className="flex-shrink-0">
+                  <RecordMatchDialog
+                    clubId={ladder.club_id}
+                    currentPlayerId={userProfileId}
+                    defaultLadderId={ladder.id}
+                    onMatchRecorded={fetchLadderDetails}
+                  />
+                </div>
               )}
             </div>
           </CardHeader>
