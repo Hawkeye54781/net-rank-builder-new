@@ -146,14 +146,14 @@ export default function MatchList({ clubId, currentPlayerId, refreshTrigger }: M
         return (
           <div
             key={match.id}
-            className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+            className="border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow"
           >
-            <div className="flex justify-between items-start mb-3">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   {match.ladder.name}
                 </Badge>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-xs sm:text-sm text-muted-foreground">
                   {format(new Date(match.match_date), 'MMM d, yyyy')}
                 </span>
                 {isTie && (
@@ -164,7 +164,8 @@ export default function MatchList({ clubId, currentPlayerId, refreshTrigger }: M
               </div>
             </div>
 
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
+            {/* Desktop Layout (768px+) */}
+            <div className="hidden md:grid md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
               {/* Player 1 */}
               <div className="text-right">
                 <div className="flex items-center justify-end gap-2 mb-1">
@@ -219,6 +220,70 @@ export default function MatchList({ clubId, currentPlayerId, refreshTrigger }: M
                   <span className="text-xs text-muted-foreground">
                     {match.player2_elo_before} → {match.player2_elo_after}
                   </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Layout (<768px) */}
+            <div className="md:hidden space-y-3">
+              {/* Score - Centered */}
+              <div className="text-center py-2">
+                <div className="text-3xl font-bold">
+                  {match.player1_score} - {match.player2_score}
+                </div>
+              </div>
+
+              {/* Player 1 */}
+              <div className="flex items-start justify-between p-2 bg-accent/30 rounded">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <h3 className="font-medium text-sm">
+                      {getPlayerName(match.player1)}
+                    </h3>
+                    {isCurrentPlayer(match.player1.id) && (
+                      <Badge variant="secondary" className="text-xs">
+                        You
+                      </Badge>
+                    )}
+                    {player1Won && (
+                      <Badge className="text-xs bg-gradient-court">
+                        Winner
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {match.player1_elo_before} → {match.player1_elo_after}
+                    </span>
+                    {renderEloChange(player1Change)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Player 2 */}
+              <div className="flex items-start justify-between p-2 bg-accent/30 rounded">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <h3 className="font-medium text-sm">
+                      {getPlayerName(match.player2)}
+                    </h3>
+                    {isCurrentPlayer(match.player2.id) && (
+                      <Badge variant="secondary" className="text-xs">
+                        You
+                      </Badge>
+                    )}
+                    {player2Won && (
+                      <Badge className="text-xs bg-gradient-court">
+                        Winner
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {renderEloChange(player2Change)}
+                    <span className="text-xs text-muted-foreground">
+                      {match.player2_elo_before} → {match.player2_elo_after}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

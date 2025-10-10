@@ -59,10 +59,26 @@ export default function LadderParticipants({
   isClubAdmin,
 }: LadderParticipantsProps) {
   const [participants, setParticipants] = useState<ParticipantWithProfile[]>([]);
+  const [participantCount, setParticipantCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [removingParticipantId, setRemovingParticipantId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+
+  const fetchParticipantCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('ladder_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('ladder_id', ladderId)
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setParticipantCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching participant count:', error);
+    }
+  };
 
   const fetchParticipants = async () => {
     setLoading(true);
@@ -97,6 +113,7 @@ export default function LadderParticipants({
       }));
 
       setParticipants(participantsWithProfiles);
+      setParticipantCount(participantsWithProfiles.length);
     } catch (error) {
       console.error('Error fetching participants:', error);
       toast({
@@ -140,6 +157,10 @@ export default function LadderParticipants({
   };
 
   useEffect(() => {
+    fetchParticipantCount();
+  }, [ladderId]);
+
+  useEffect(() => {
     if (open) {
       fetchParticipants();
     }
@@ -148,10 +169,10 @@ export default function LadderParticipants({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="ml-2">
-          <Users className="h-4 w-4 mr-1" />
-          Participants
-        </Button>
+        <Badge variant="outline" className="text-xs cursor-pointer hover:bg-accent">
+          <Users className="h-3 w-3 mr-1" />
+          {participantCount}
+        </Badge>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[600px] overflow-hidden flex flex-col">
         <DialogHeader>

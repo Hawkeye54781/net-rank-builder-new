@@ -117,9 +117,9 @@ export default function AddLadderDialog({ clubId, onLadderAdded }: AddLadderDial
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-court hover:bg-primary-light">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Ladder
+        <Button className="bg-gradient-court hover:bg-primary-light flex-shrink-0">
+          <Plus className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Add Ladder</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

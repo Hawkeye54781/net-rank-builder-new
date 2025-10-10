@@ -123,98 +123,102 @@ export default function LadderManagement({ ladders, onLadderUpdated }: LadderMan
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {ladders.map((ladder) => (
         <div
           key={ladder.id}
-          className="flex items-center justify-between p-4 border rounded-lg bg-card"
+          className="p-3 sm:p-4 border rounded-lg bg-card hover:bg-accent/5 transition-colors"
         >
-          <div className="flex items-center space-x-4">
-            <div>
-              <h3 className="font-medium">{ladder.name}</h3>
-              <div className="flex items-center space-x-2 mt-1">
-                  <Badge variant="outline">{formatType(ladder.type)}</Badge>
-                  <Badge
-                    variant={ladder.is_active ? 'default' : 'secondary'}
-                    className={
-                      ladder.is_active
-                        ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-800'
-                        : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
-                    }
-                  >
-                    {ladder.is_active ? 'Active' : 'Inactive'}
-                  </Badge>
-                  {ladder.is_active && (
-                    <LadderParticipants
-                      ladderId={ladder.id}
-                      ladderName={ladder.name}
-                      isClubAdmin={true}
-                    />
+          {/* Title row with menu */}
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <h3 className="font-medium text-sm sm:text-base truncate">{ladder.name}</h3>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 flex-shrink-0"
+                  disabled={deletingLadderId === ladder.id || togglingLadderId === ladder.id}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => handleToggleActive(ladder)}
+                  disabled={togglingLadderId === ladder.id}
+                  className="cursor-pointer"
+                >
+                  {ladder.is_active ? (
+                    <>
+                      <EyeOff className="mr-2 h-4 w-4" />
+                      Deactivate
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="mr-2 h-4 w-4" />
+                      Activate
+                    </>
                   )}
-              </div>
-            </div>
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="h-8 w-8 p-0"
-                disabled={deletingLadderId === ladder.id || togglingLadderId === ladder.id}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => handleToggleActive(ladder)}
-                disabled={togglingLadderId === ladder.id}
-              >
-                {ladder.is_active ? (
-                  <>
-                    <EyeOff className="mr-2 h-4 w-4" />
-                    Deactivate
-                  </>
-                ) : (
-                  <>
-                    <Eye className="mr-2 h-4 w-4" />
-                    Activate
-                  </>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Ladder</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete "{ladder.name}"? This action cannot be
-                      undone and will remove all associated matches and rankings.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => handleDeleteLadder(ladder.id, ladder.name)}
-                      className="bg-destructive hover:bg-destructive/90"
-                      disabled={deletingLadderId === ladder.id}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      className="text-destructive focus:text-destructive cursor-pointer"
                     >
-                      {deletingLadderId === ladder.id ? 'Deleting...' : 'Delete'}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Ladder
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Ladder</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{ladder.name}"? This action cannot be
+                        undone and will remove all associated matches and rankings.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteLadder(ladder.id, ladder.name)}
+                        className="bg-destructive hover:bg-destructive/90"
+                        disabled={deletingLadderId === ladder.id}
+                      >
+                        {deletingLadderId === ladder.id ? 'Deleting...' : 'Delete'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          {/* Badges row */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="text-xs">{formatType(ladder.type)}</Badge>
+            <Badge
+              variant={ladder.is_active ? 'default' : 'secondary'}
+              className={
+                `text-xs ${
+                ladder.is_active
+                  ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-800'
+                  : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
+                }`
+              }
+            >
+              {ladder.is_active ? 'Active' : 'Inactive'}
+            </Badge>
+            {ladder.is_active && (
+              <LadderParticipants
+                ladderId={ladder.id}
+                ladderName={ladder.name}
+                isClubAdmin={true}
+              />
+            )}
+          </div>
         </div>
       ))}
     </div>

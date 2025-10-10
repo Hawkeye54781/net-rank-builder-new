@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Trophy, Users, Calendar } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Calendar, UserCircle2 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -160,102 +160,87 @@ export default function LadderDetails() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
+      <header className="border-b bg-card sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3">
+          {/* Top row: Navigation and actions */}
+          <div className="flex items-center justify-between mb-3">
             <Button
               variant="ghost"
+              size="icon"
               onClick={() => navigate('/')}
+              className="h-9 w-9 -ml-2"
+              title="Back to Dashboard"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
+              <ArrowLeft className="h-4 w-4" />
             </Button>
-            <ThemeToggle />
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/profile')}
+                className="h-9 w-9"
+                title="Profile"
+              >
+                <UserCircle2 className="h-4 w-4" />
+              </Button>
+              <ThemeToggle />
+            </div>
           </div>
-          <div className="flex items-center justify-between">
+          
+          {/* Ladder info */}
+          <div className="space-y-3">
             <div>
-              <h1 className="text-3xl font-bold text-primary">{ladder.name}</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-primary truncate">{ladder.name}</h1>
               {club && (
-                <p className="text-muted-foreground mt-1">{club.name}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">{club.name}</p>
               )}
             </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="outline">{formatType(ladder.type)}</Badge>
+            
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                {formatType(ladder.type)}
+              </Badge>
               <Badge
                 variant={ladder.is_active ? 'default' : 'secondary'}
                 className={
+                  `text-xs ${
                   ladder.is_active
                     ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-800'
                     : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
+                  }`
                 }
               >
                 {ladder.is_active ? 'Active' : 'Inactive'}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                <Users className="h-3 w-3 mr-1" />
+                {participants.length} {participants.length === 1 ? 'player' : 'players'}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                <Calendar className="h-3 w-3 mr-1" />
+                {formatDate(ladder.created_at)}
               </Badge>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="shadow-card-tennis">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Participants</CardTitle>
-              <Users className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">
-                {participants.length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {participants.length === 1 ? 'Player' : 'Players'} competing
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-card-tennis">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Ladder Type</CardTitle>
-              <Trophy className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatType(ladder.type)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Competition format
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-card-tennis">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Created</CardTitle>
-              <Calendar className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatDate(ladder.created_at).split(',')[0]}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {formatDate(ladder.created_at).split(',')[1]}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Participants Rankings */}
         <Card>
-          <CardHeader>
-            <CardTitle>Ladder Rankings</CardTitle>
-            <CardDescription>
-              Current standings for {ladder.name}
-            </CardDescription>
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg sm:text-xl">Rankings</CardTitle>
+                <CardDescription className="mt-1">
+                  {participants.length} {participants.length === 1 ? 'player' : 'players'} competing
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {participants.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {participants.map((participant, index) => {
                   const profile = participant.profiles;
                   const winRate = profile.matches_played > 0
@@ -265,29 +250,29 @@ export default function LadderDetails() {
                   return (
                     <div
                       key={participant.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                      className="flex items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-accent/50 transition-colors"
                     >
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 rounded-full bg-gradient-court flex items-center justify-center text-white font-bold text-lg">
+                      <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-full bg-gradient-court flex items-center justify-center text-white font-bold text-base sm:text-lg">
                           {index + 1}
                         </div>
-                        <div>
-                          <h3 className="font-medium text-lg">
+                        <div className="min-w-0">
+                          <h3 className="font-medium text-base sm:text-lg truncate">
                             {profile.first_name} {profile.last_name}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             {profile.matches_played} {profile.matches_played === 1 ? 'match' : 'matches'} played
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold text-xl text-primary">
+                      <div className="text-right flex-shrink-0">
+                        <div className="font-bold text-lg sm:text-xl text-primary">
                           {profile.elo_rating}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                           {profile.matches_played > 0
-                            ? `${winRate}% win rate`
-                            : 'No matches yet'}
+                            ? `${winRate}% win`
+                            : 'No matches'}
                         </div>
                       </div>
                     </div>

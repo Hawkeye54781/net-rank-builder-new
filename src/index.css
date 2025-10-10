@@ -127,4 +127,30 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Mobile-optimized touch targets and interactions */
+  @media (max-width: 768px) {
+    /* Ensure minimum touch target sizes for better mobile UX */
+    button, 
+    a,
+    [role="button"],
+    [role="menuitem"] {
+      min-height: 44px;
+    }
+    
+    /* Improve tap highlight for mobile devices */
+    * {
+      -webkit-tap-highlight-color: hsl(var(--primary) / 0.1);
+    }
+  }
+
+  /* Better scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent text size adjustments on orientation change */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
 }

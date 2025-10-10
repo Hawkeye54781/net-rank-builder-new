@@ -6,14 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Session } from '@supabase/supabase-js';
-import { Trophy, Users, Activity, TrendingUp, Settings, Shield } from 'lucide-react';
+import { Trophy, Users, Settings, Shield, UserCircle2, LogOut } from 'lucide-react';
 import { useClubAdmin } from '@/hooks/useClubAdmin';
 import AddLadderDialog from '@/components/AddLadderDialog';
 import LadderManagement from '@/components/LadderManagement';
 import ClubAdminManagement from '@/components/ClubAdminManagement';
 import LadderRow from '@/components/LadderRow';
-import RecordMatchDialog from '@/components/RecordMatchDialog';
-import MatchList from '@/components/MatchList';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useToast } from '@/hooks/use-toast';
 
@@ -57,7 +55,6 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
   const [allLadders, setAllLadders] = useState<Ladder[]>([]); // For admin view (includes inactive)
   const [rankings, setRankings] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [matchRefreshTrigger, setMatchRefreshTrigger] = useState(0);
   const { isAdmin, loading: adminLoading } = useClubAdmin(user, profile?.club_id || null);
 
   useEffect(() => {
@@ -137,12 +134,6 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
     }
   };
 
-  const winRate = profile ? 
-    (profile.matches_played > 0 ? (profile.matches_won / profile.matches_played * 100).toFixed(1) : '0') 
-    : '0';
-
-  const userRank = rankings.findIndex(p => p.id === profile?.id) + 1;
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -157,98 +148,60 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-primary">🎾 Tennis Ladder</h1>
-            {club && (
-              <Badge variant="secondary" className="text-sm">
+      <header className="border-b bg-card sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Left: Title and Club */}
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-primary truncate">🎾 Tennis Ladder</h1>
+              {club && (
+                <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
+                  {club.name}
+                </Badge>
+              )}
+            </div>
+            
+            {/* Right: Action Buttons */}
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/profile')}
+                className="h-9 w-9"
+                title="Profile"
+              >
+                <UserCircle2 className="h-4 w-4" />
+              </Button>
+              <ThemeToggle />
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onSignOut} 
+                className="h-9 w-9"
+                title="Sign Out"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          {/* Mobile: Club badge on second line */}
+          {club && (
+            <div className="mt-2 sm:hidden">
+              <Badge variant="secondary" className="text-xs">
                 {club.name}
               </Badge>
-            )}
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">
-              Welcome, {profile?.first_name || user?.email?.split('@')[0]}!
-            </span>
-            <ThemeToggle />
-            <Button variant="outline" onClick={onSignOut}>
-              Sign Out
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Player Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="shadow-card-tennis">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">ELO Rating</CardTitle>
-              <TrendingUp className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">
-                {profile?.elo_rating || 1200}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Club Rank: #{userRank || 'N/A'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-card-tennis">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Matches Played</CardTitle>
-              <Activity className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {profile?.matches_played || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Total matches
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-card-tennis">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Win Rate</CardTitle>
-              <Trophy className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {winRate}%
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {profile?.matches_won || 0} wins
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-card-tennis">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Ladders</CardTitle>
-              <Users className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {ladders.length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Available to join
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Main Content Tabs */}
         <Tabs defaultValue="ladders" className="space-y-6">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
             <TabsTrigger value="ladders">Ladders</TabsTrigger>
             <TabsTrigger value="rankings">Rankings</TabsTrigger>
-            <TabsTrigger value="matches">Recent Matches</TabsTrigger>
             {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
           </TabsList>
 
@@ -283,74 +236,54 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
 
           <TabsContent value="rankings" className="space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Club Rankings</CardTitle>
-                <CardDescription>
-                  Top players at {club?.name}
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg sm:text-xl">Club Rankings</CardTitle>
+                <CardDescription className="mt-1">
+                  Top 10 players at {club?.name}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {rankings.map((player, index) => (
-                    <div key={player.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-8 h-8 rounded-full bg-gradient-court flex items-center justify-center text-white font-bold">
-                          {index + 1}
+                <div className="space-y-3">
+                  {rankings.map((player, index) => {
+                    const winRate = player.matches_played > 0
+                      ? ((player.matches_won / player.matches_played) * 100).toFixed(1)
+                      : '0';
+                    
+                    return (
+                      <div 
+                        key={player.id} 
+                        className="flex items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-full bg-gradient-court flex items-center justify-center text-white font-bold text-base sm:text-lg">
+                            {index + 1}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="font-medium text-base sm:text-lg truncate">
+                                {player.first_name} {player.last_name}
+                              </h3>
+                              {player.id === profile?.id && (
+                                <Badge variant="secondary" className="text-xs">You</Badge>
+                              )}
+                            </div>
+                            <p className="text-xs sm:text-sm text-muted-foreground">
+                              {player.matches_played} {player.matches_played === 1 ? 'match' : 'matches'} played
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium">
-                            {player.first_name} {player.last_name}
-                            {player.id === profile?.id && (
-                              <Badge variant="secondary" className="ml-2">You</Badge>
-                            )}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {player.matches_played} matches played
-                          </p>
+                        <div className="text-right flex-shrink-0">
+                          <div className="font-bold text-lg sm:text-xl text-primary">
+                            {player.elo_rating}
+                          </div>
+                          <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                            {player.matches_played > 0 ? `${winRate}% win` : 'No matches'}
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold text-lg text-primary">{player.elo_rating}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {player.matches_played > 0 ? 
-                            `${((player.matches_won / player.matches_played) * 100).toFixed(1)}% win rate` : 
-                            'No matches'
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="matches" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Recent Matches</CardTitle>
-                    <CardDescription>
-                      Your match history and results
-                    </CardDescription>
-                  </div>
-                  <RecordMatchDialog
-                    clubId={profile?.club_id || ''}
-                    currentPlayerId={profile?.id || ''}
-                    onMatchRecorded={() => {
-                      fetchUserData();
-                      setMatchRefreshTrigger(prev => prev + 1);
-                    }}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <MatchList
-                  clubId={profile?.club_id || ''}
-                  currentPlayerId={profile?.id || ''}
-                  refreshTrigger={matchRefreshTrigger}
-                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -359,9 +292,9 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
             <TabsContent value="admin" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <CardTitle className="flex items-center gap-2 mb-2">
                         <Settings className="h-5 w-5" />
                         Ladder Management
                       </CardTitle>
@@ -385,7 +318,7 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 mb-2">
                     <Shield className="h-5 w-5" />
                     Club Admin Management
                   </CardTitle>
