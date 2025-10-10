@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Session } from '@supabase/supabase-js';
 import { Trophy, Users, Settings, Shield, UserCircle2, LogOut } from 'lucide-react';
 import { useClubAdmin } from '@/hooks/useClubAdmin';
@@ -46,6 +45,8 @@ interface DashboardProps {
   onSignOut: () => void;
 }
 
+type ViewType = 'ladders' | 'rankings' | 'admin';
+
 export default function Dashboard({ user, session, onSignOut }: DashboardProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -55,6 +56,7 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
   const [allLadders, setAllLadders] = useState<Ladder[]>([]); // For admin view (includes inactive)
   const [rankings, setRankings] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState<ViewType>('ladders');
   const { isAdmin, loading: adminLoading } = useClubAdmin(user, profile?.club_id || null);
 
   useEffect(() => {
@@ -197,15 +199,53 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="ladders" className="space-y-6">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
-            <TabsTrigger value="ladders">Ladders</TabsTrigger>
-            <TabsTrigger value="rankings">Rankings</TabsTrigger>
-            {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
-          </TabsList>
+        {/* Segmented Control Navigation */}
+        <div className="mb-6">
+          <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-full w-full sm:w-auto">
+            <Button
+              variant={activeView === 'ladders' ? 'default' : 'ghost'}
+              className={`rounded-full flex-1 sm:flex-none px-3 sm:px-6 py-2 transition-all ${
+                activeView === 'ladders' 
+                  ? 'shadow-sm' 
+                  : 'hover:bg-background/50'
+              }`}
+              onClick={() => setActiveView('ladders')}
+            >
+              <Trophy className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline ml-2">Ladders</span>
+            </Button>
+            <Button
+              variant={activeView === 'rankings' ? 'default' : 'ghost'}
+              className={`rounded-full flex-1 sm:flex-none px-3 sm:px-6 py-2 transition-all ${
+                activeView === 'rankings' 
+                  ? 'shadow-sm' 
+                  : 'hover:bg-background/50'
+              }`}
+              onClick={() => setActiveView('rankings')}
+            >
+              <Users className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline ml-2">Rankings</span>
+            </Button>
+            {isAdmin && (
+              <Button
+                variant={activeView === 'admin' ? 'default' : 'ghost'}
+                className={`rounded-full flex-1 sm:flex-none px-3 sm:px-6 py-2 transition-all ${
+                  activeView === 'admin' 
+                    ? 'shadow-sm' 
+                    : 'hover:bg-background/50'
+                }`}
+                onClick={() => setActiveView('admin')}
+              >
+                <Settings className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline ml-2">Admin</span>
+              </Button>
+            )}
+          </div>
+        </div>
 
-          <TabsContent value="ladders" className="space-y-6">
+        {/* Content Views */}
+        <div className="space-y-6">
+          {activeView === 'ladders' && (
             <Card>
               <CardHeader>
                 <CardTitle>Available Ladders</CardTitle>
@@ -232,9 +272,9 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
 
-          <TabsContent value="rankings" className="space-y-6">
+          {activeView === 'rankings' && (
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg sm:text-xl">Club Rankings</CardTitle>
@@ -286,10 +326,10 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
 
-          {isAdmin && (
-            <TabsContent value="admin" className="space-y-6">
+          {isAdmin && activeView === 'admin' && (
+            <>
               <Card>
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -333,9 +373,9 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                   />
                 </CardContent>
               </Card>
-            </TabsContent>
+            </>
           )}
-        </Tabs>
+        </div>
       </div>
     </div>
   );

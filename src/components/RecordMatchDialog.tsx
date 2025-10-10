@@ -113,6 +113,7 @@ interface RecordMatchDialogProps {
   clubId: string;
   currentPlayerId: string;
   onMatchRecorded: () => void;
+  defaultLadderId?: string;
 }
 
 /**
@@ -123,6 +124,7 @@ export default function RecordMatchDialog({
   clubId,
   currentPlayerId,
   onMatchRecorded,
+  defaultLadderId,
 }: RecordMatchDialogProps) {
   const [open, setOpen] = useState(false);
   const [ladders, setLadders] = useState<Ladder[]>([]);
@@ -133,7 +135,7 @@ export default function RecordMatchDialog({
   const form = useForm<RecordMatchFormData>({
     resolver: zodResolver(recordMatchSchema),
     defaultValues: {
-      ladderId: '',
+      ladderId: defaultLadderId || '',
       player1Id: currentPlayerId,
       player2Id: '',
       player1Score: '',
@@ -191,7 +193,7 @@ export default function RecordMatchDialog({
       });
 
       form.reset({
-        ladderId: '',
+        ladderId: defaultLadderId || '',
         player1Id: currentPlayerId,
         player2Id: '',
         player1Score: '',
@@ -225,10 +227,10 @@ export default function RecordMatchDialog({
           Record a Match
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Record Match</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-lg sm:text-xl">Record Match</DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             Enter match details to update player rankings and statistics.
           </DialogDescription>
         </DialogHeader>
@@ -239,7 +241,7 @@ export default function RecordMatchDialog({
           </div>
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 sm:space-y-4">
               <FormField
                 control={form.control}
                 name="ladderId"
@@ -265,7 +267,7 @@ export default function RecordMatchDialog({
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="player1Id"
@@ -318,14 +320,14 @@ export default function RecordMatchDialog({
               </div>
 
               <div>
-                <FormLabel className="mb-2 block">Match Score (Sets Won)</FormLabel>
-                <div className="grid grid-cols-2 gap-4">
+                <FormLabel className="mb-3 block text-sm">Match Score (Sets Won)</FormLabel>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <FormField
                     control={form.control}
                     name="player1Score"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm text-muted-foreground">Player 1 Sets</FormLabel>
+                        <FormLabel className="text-xs sm:text-sm text-muted-foreground">Player 1 Sets</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -348,7 +350,7 @@ export default function RecordMatchDialog({
                     name="player2Score"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm text-muted-foreground">Player 2 Sets</FormLabel>
+                        <FormLabel className="text-xs sm:text-sm text-muted-foreground">Player 2 Sets</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -366,7 +368,7 @@ export default function RecordMatchDialog({
                     )}
                   />
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-3">
                   Select the number of sets won by each player (0-2). Ties are allowed for time-limited matches.
                 </p>
               </div>
@@ -375,8 +377,8 @@ export default function RecordMatchDialog({
                 control={form.control}
                 name="matchDate"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Match Date</FormLabel>
+                    <FormItem className="flex flex-col">
+                    <FormLabel className="text-sm mb-2">Match Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -408,7 +410,7 @@ export default function RecordMatchDialog({
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormDescription>
+                    <FormDescription className="text-xs sm:text-sm">
                       The date when this match was played.
                     </FormDescription>
                     <FormMessage />
@@ -416,16 +418,21 @@ export default function RecordMatchDialog({
                 )}
               />
 
-              <DialogFooter>
+              <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-6">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => handleOpenChange(false)}
                   disabled={isSubmitting}
+                  className="w-full sm:w-auto"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto"
+                >
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Record Match
                 </Button>

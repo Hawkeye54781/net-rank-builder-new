@@ -4,9 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Trophy, Users, Calendar, UserCircle2 } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Calendar, UserCircle2, Plus } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import RecordMatchDialog from '@/components/RecordMatchDialog';
 
 interface Ladder {
   id: string;
@@ -48,6 +49,7 @@ export default function LadderDetails() {
   const [participants, setParticipants] = useState<LadderParticipant[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [userProfileId, setUserProfileId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLadderDetails();
@@ -57,6 +59,19 @@ export default function LadderDetails() {
   const fetchCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setUser(user);
+    
+    if (user) {
+      // Fetch user's profile ID
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (profileData) {
+        setUserProfileId(profileData.id);
+      }
+    }
   };
 
   const fetchLadderDetails = async () => {
@@ -229,13 +244,21 @@ export default function LadderDetails() {
         {/* Participants Rankings */}
         <Card>
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg sm:text-xl">Rankings</CardTitle>
-                <CardDescription className="mt-1">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div className="flex-1">
+                <CardTitle className="text-lg sm:text-xl mb-2">Rankings</CardTitle>
+                <CardDescription>
                   {participants.length} {participants.length === 1 ? 'player' : 'players'} competing
                 </CardDescription>
               </div>
+              {user && userProfileId && ladder.is_active && (
+                <RecordMatchDialog
+                  clubId={ladder.club_id}
+                  currentPlayerId={userProfileId}
+                  defaultLadderId={ladder.id}
+                  onMatchRecorded={fetchLadderDetails}
+                />
+              )}
             </div>
           </CardHeader>
           <CardContent>

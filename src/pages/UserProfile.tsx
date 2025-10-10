@@ -5,7 +5,6 @@ import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Trophy, Users, Activity, TrendingUp, Calendar, Award, LogOut } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import MatchList from '@/components/MatchList';
@@ -44,6 +43,8 @@ interface UserProfileProps {
   onSignOut: () => void;
 }
 
+type ProfileViewType = 'matches' | 'ladders';
+
 export default function UserProfile({ user, onSignOut }: UserProfileProps) {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -53,6 +54,7 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
   const [participatingLadders, setParticipatingLadders] = useState<LadderParticipant[]>([]);
   const [loading, setLoading] = useState(true);
   const [matchRefreshTrigger, setMatchRefreshTrigger] = useState(0);
+  const [activeView, setActiveView] = useState<ProfileViewType>('matches');
 
   useEffect(() => {
     fetchUserProfile();
@@ -281,14 +283,39 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
           </Card>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="matches" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="matches">Match History</TabsTrigger>
-            <TabsTrigger value="ladders">My Ladders</TabsTrigger>
-          </TabsList>
+        {/* Segmented Control Navigation */}
+        <div className="mb-6">
+          <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-full w-full sm:w-auto">
+            <Button
+              variant={activeView === 'matches' ? 'default' : 'ghost'}
+              className={`rounded-full flex-1 sm:flex-none px-3 sm:px-6 py-2 transition-all ${
+                activeView === 'matches' 
+                  ? 'shadow-sm' 
+                  : 'hover:bg-background/50'
+              }`}
+              onClick={() => setActiveView('matches')}
+            >
+              <Activity className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline ml-2">Match History</span>
+            </Button>
+            <Button
+              variant={activeView === 'ladders' ? 'default' : 'ghost'}
+              className={`rounded-full flex-1 sm:flex-none px-3 sm:px-6 py-2 transition-all ${
+                activeView === 'ladders' 
+                  ? 'shadow-sm' 
+                  : 'hover:bg-background/50'
+              }`}
+              onClick={() => setActiveView('ladders')}
+            >
+              <Users className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline ml-2">My Ladders</span>
+            </Button>
+          </div>
+        </div>
 
-          <TabsContent value="matches" className="space-y-6">
+        {/* Content Views */}
+        <div className="space-y-6">
+          {activeView === 'matches' && (
             <Card>
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -316,9 +343,9 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
                 />
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
 
-          <TabsContent value="ladders" className="space-y-6">
+          {activeView === 'ladders' && (
             <Card>
               <CardHeader>
                 <CardTitle>My Ladders</CardTitle>
@@ -369,8 +396,8 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </div>
     </div>
   );
