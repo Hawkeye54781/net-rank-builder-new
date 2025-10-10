@@ -179,7 +179,7 @@ export default function ClubAdminManagement({ clubId, currentUserId }: ClubAdmin
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {members.map((member) => {
         const memberIsAdmin = isAdmin(member.user_id);
         const isCurrentUser = member.user_id === currentUserId;
@@ -187,100 +187,108 @@ export default function ClubAdminManagement({ clubId, currentUserId }: ClubAdmin
         return (
           <div
             key={member.id}
-            className="flex items-center justify-between p-4 border rounded-lg bg-card"
+            className="p-3 sm:p-4 border rounded-lg bg-card hover:bg-accent/5 transition-colors"
           >
-            <div className="flex items-center space-x-4">
-              <div>
-                <h3 className="font-medium flex items-center gap-2">
-                  {member.first_name} {member.last_name}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              {/* Member Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <h3 className="font-medium text-sm sm:text-base">
+                    {member.first_name} {member.last_name}
+                  </h3>
                   {isCurrentUser && (
                     <Badge variant="secondary" className="text-xs">You</Badge>
                   )}
                   {memberIsAdmin && (
                     <Badge 
                       variant="default" 
-                      className="bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-100 dark:border-purple-800"
+                      className="text-xs bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-100 dark:border-purple-800"
                     >
                       <Crown className="h-3 w-3 mr-1" />
                       Admin
                     </Badge>
                   )}
-                </h3>
-                <div className="flex items-center space-x-2 mt-1">
-                  <p className="text-sm text-muted-foreground">{member.email}</p>
-                  <span className="text-muted-foreground">•</span>
-                  <p className="text-sm text-muted-foreground">
-                    {member.matches_played} matches played
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{member.email}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {member.matches_played} {member.matches_played === 1 ? 'match' : 'matches'} played
                   </p>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2">
-              {!memberIsAdmin ? (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={processingUserId === member.user_id}
-                    >
-                      <ShieldCheck className="mr-2 h-4 w-4" />
-                      Make Admin
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Promote to Club Admin</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to make {member.first_name} {member.last_name} a club admin? 
-                        They will be able to manage ladders, matches, and other club members' admin status.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handlePromoteToAdmin(member)}
+              {/* Action Button */}
+              <div className="flex items-center gap-2 sm:flex-shrink-0">
+                {!memberIsAdmin ? (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full sm:w-auto"
                         disabled={processingUserId === member.user_id}
                       >
-                        {processingUserId === member.user_id ? 'Promoting...' : 'Promote to Admin'}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              ) : (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={processingUserId === member.user_id || isCurrentUser}
-                    >
-                      <ShieldOff className="mr-2 h-4 w-4" />
-                      Remove Admin
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Remove Club Admin</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to remove {member.first_name} {member.last_name}'s admin privileges? 
-                        They will no longer be able to manage ladders, matches, or other admins.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDemoteFromAdmin(member)}
-                        className="bg-destructive hover:bg-destructive/90"
-                        disabled={processingUserId === member.user_id}
+                        <ShieldCheck className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Make Admin</span>
+                        <span className="sm:hidden ml-2">Promote</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Promote to Club Admin</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to make {member.first_name} {member.last_name} a club admin? 
+                          They will be able to manage ladders, matches, and other club members' admin status.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handlePromoteToAdmin(member)}
+                          disabled={processingUserId === member.user_id}
+                        >
+                          {processingUserId === member.user_id ? 'Promoting...' : 'Promote'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                ) : (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full sm:w-auto text-destructive hover:text-destructive"
+                        disabled={processingUserId === member.user_id || isCurrentUser}
                       >
-                        {processingUserId === member.user_id ? 'Removing...' : 'Remove Admin'}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
+                        <ShieldOff className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Remove Admin</span>
+                        <span className="sm:hidden ml-2">Remove</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove Club Admin</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to remove {member.first_name} {member.last_name}'s admin privileges? 
+                          They will no longer be able to manage ladders, matches, or other admins.
+                          {isCurrentUser && " You cannot remove your own admin privileges."}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDemoteFromAdmin(member)}
+                          className="bg-destructive hover:bg-destructive/90"
+                          disabled={processingUserId === member.user_id}
+                        >
+                          {processingUserId === member.user_id ? 'Removing...' : 'Remove'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </div>
             </div>
           </div>
         );

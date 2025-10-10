@@ -64,21 +64,22 @@ export default function LadderRow({ ladder, playerId }: LadderRowProps) {
   return (
     <>
       <div
-        className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+        className="flex items-center justify-between p-3 sm:p-4 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors min-h-[72px]"
         onClick={handleRowClick}
       >
-        <div className="flex-1">
-          <h3 className="font-medium">{ladder.name}</h3>
-          <p className="text-sm text-muted-foreground capitalize">
+        <div className="flex-1 min-w-0 mr-3">
+          <h3 className="font-medium text-sm sm:text-base truncate">{ladder.name}</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground capitalize">
             {ladder.type} competition
           </p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           {/* Participant count badge */}
           {!isLoading && (
-            <Badge variant="outline" className="flex items-center gap-1">
+            <Badge variant="outline" className="flex items-center gap-1 text-xs">
               <Users className="h-3 w-3" />
-              {participantCount}
+              <span className="hidden xs:inline">{participantCount}</span>
+              <span className="xs:hidden">{participantCount}</span>
             </Badge>
           )}
 
@@ -92,16 +93,16 @@ export default function LadderRow({ ladder, playerId }: LadderRowProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0"
+                      className="h-9 w-9 p-0 touch-manipulation"
                       disabled={isLeaving}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <MoreHorizontal className="h-4 w-4" />
+                      <MoreHorizontal className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
+                      className="text-destructive focus:text-destructive cursor-pointer touch-manipulation min-h-[44px]"
                       onClick={(e) => {
                         e.stopPropagation();
                         setIsAlertOpen(true);
@@ -122,21 +123,22 @@ export default function LadderRow({ ladder, playerId }: LadderRowProps) {
                     joinLadder();
                   }}
                   disabled={isJoining}
-                  className="hover:bg-primary hover:text-primary-foreground"
+                  className="hover:bg-primary hover:text-primary-foreground h-9 px-3 text-xs sm:text-sm touch-manipulation"
                 >
                   {isJoining ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="h-4 w-4 animate-spin mr-1 sm:mr-2" />
                   ) : (
-                    <UserPlus className="h-4 w-4 mr-2" />
+                    <UserPlus className="h-4 w-4 mr-1 sm:mr-2" />
                   )}
-                  {isJoining ? 'Joining...' : 'Join'}
+                  <span className="hidden sm:inline">{isJoining ? 'Joining...' : 'Join'}</span>
+                  <span className="sm:hidden">{isJoining ? '...' : 'Join'}</span>
                 </Button>
               )}
             </>
           )}
 
           {isLoading && (
-            <Button variant="ghost" size="sm" disabled>
+            <Button variant="ghost" size="sm" disabled className="h-9 w-9">
               <Loader2 className="h-4 w-4 animate-spin" />
             </Button>
           )}

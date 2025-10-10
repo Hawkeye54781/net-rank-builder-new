@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import AuthPage from '@/components/AuthPage';
 import Dashboard from '@/components/Dashboard';
+import UserProfile from '@/pages/UserProfile';
 
 const Index = () => {
+  const location = useLocation();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const isProfilePage = location.pathname === '/profile';
 
   useEffect(() => {
     // Set up auth state listener
@@ -53,6 +57,10 @@ const Index = () => {
 
   if (!user || !session) {
     return <AuthPage onAuthSuccess={handleAuthSuccess} />;
+  }
+
+  if (isProfilePage) {
+    return <UserProfile user={user} onSignOut={handleSignOut} />;
   }
 
   return <Dashboard user={user} session={session} onSignOut={handleSignOut} />;
