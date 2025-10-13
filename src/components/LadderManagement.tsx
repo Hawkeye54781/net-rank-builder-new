@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
 import LadderParticipants from '@/components/LadderParticipants';
+import EditLadderDialog from '@/components/EditLadderDialog';
 
 interface Ladder {
   id: string;
@@ -41,6 +42,7 @@ interface LadderManagementProps {
 export default function LadderManagement({ ladders, onLadderUpdated }: LadderManagementProps) {
   const [deletingLadderId, setDeletingLadderId] = useState<string | null>(null);
   const [togglingLadderId, setTogglingLadderId] = useState<string | null>(null);
+  const [editingLadderId, setEditingLadderId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleToggleActive = async (ladder: Ladder) => {
@@ -144,6 +146,19 @@ export default function LadderManagement({ ladders, onLadderUpdated }: LadderMan
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <EditLadderDialog
+                  ladderId={ladder.id}
+                  currentName={ladder.name}
+                  onLadderUpdated={onLadderUpdated}
+                >
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="cursor-pointer"
+                  >
+                    <Edit2 className="mr-2 h-4 w-4" />
+                    Rename Ladder
+                  </DropdownMenuItem>
+                </EditLadderDialog>
                 <DropdownMenuItem
                   onClick={() => handleToggleActive(ladder)}
                   disabled={togglingLadderId === ladder.id}
