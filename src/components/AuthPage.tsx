@@ -86,7 +86,8 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
     }
 
     setLoading(true);
-    const redirectUrl = `${window.location.origin}/`;
+    // Use environment variable for redirect URL to ensure production URLs work correctly
+    const redirectUrl = import.meta.env.VITE_APP_URL || window.location.origin;
 
     const { data, error } = await supabase.auth.signUp({
       email,
