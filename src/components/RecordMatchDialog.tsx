@@ -156,14 +156,14 @@ export default function RecordMatchDialog({
     }
   }, [open, clubId]);
 
-  // Fetch ladder participants when ladder is selected
+  // Fetch ladder participants when ladder is selected or players data changes
   useEffect(() => {
-    if (selectedLadderId) {
+    if (selectedLadderId && players.length > 0) {
       fetchLadderParticipants(selectedLadderId);
     } else {
       setLadderParticipants([]);
     }
-  }, [selectedLadderId]);
+  }, [selectedLadderId, players]);
 
   const fetchData = async () => {
     setLoading(true);
