@@ -78,6 +78,28 @@ export function useRecordMatch() {
         throw new Error('Scores must be non-negative');
       }
 
+      // Validate that both players are active participants in the ladder
+      const { data: participants, error: participantsError } = await supabase
+        .from('ladder_participants')
+        .select('player_id')
+        .eq('ladder_id', params.ladderId)
+        .eq('is_active', true)
+        .in('player_id', [params.player1Id, params.player2Id]);
+
+      if (participantsError) throw participantsError;
+
+      if (!participants || participants.length !== 2) {
+        const missingPlayers = [];
+        const participantIds = participants?.map(p => p.player_id) || [];
+        if (!participantIds.includes(params.player1Id)) {
+          missingPlayers.push('Player 1');
+        }
+        if (!participantIds.includes(params.player2Id)) {
+          missingPlayers.push('Player 2');
+        }
+        throw new Error(`${missingPlayers.join(' and ')} must join this ladder before recording a match`);
+      }
+
       // Fetch current player data
       const [player1, player2] = await Promise.all([
         fetchPlayerData(params.player1Id),

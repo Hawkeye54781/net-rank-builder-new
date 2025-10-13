@@ -114,6 +114,7 @@ interface RecordMatchDialogProps {
   currentPlayerId: string;
   onMatchRecorded: () => void;
   defaultLadderId?: string;
+  isAdmin?: boolean;
 }
 
 /**
@@ -125,10 +126,12 @@ export default function RecordMatchDialog({
   currentPlayerId,
   onMatchRecorded,
   defaultLadderId,
+  isAdmin = false,
 }: RecordMatchDialogProps) {
   const [open, setOpen] = useState(false);
   const [ladders, setLadders] = useState<Ladder[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [ladderParticipants, setLadderParticipants] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
   const { recordMatch, isSubmitting } = useRecordMatch();
 
@@ -144,12 +147,23 @@ export default function RecordMatchDialog({
     },
   });
 
+  const selectedLadderId = form.watch('ladderId');
+
   // Fetch ladders and players when dialog opens
   useEffect(() => {
     if (open) {
       fetchData();
     }
   }, [open, clubId]);
+
+  // Fetch ladder participants when ladder is selected
+  useEffect(() => {
+    if (selectedLadderId) {
+      fetchLadderParticipants(selectedLadderId);
+    } else {
+      setLadderParticipants([]);
+    }
+  }, [selectedLadderId]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -174,10 +188,36 @@ export default function RecordMatchDialog({
 
       if (playersError) throw playersError;
       setPlayers(playersData || []);
+
+      // If a default ladder is set, fetch its participants
+      if (defaultLadderId) {
+        await fetchLadderParticipants(defaultLadderId);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLadderParticipants = async (ladderId: string) => {
+    try {
+      // Fetch participants for the selected ladder
+      const { data: participantsData, error: participantsError } = await supabase
+        .from('ladder_participants')
+        .select('player_id')
+        .eq('ladder_id', ladderId)
+        .eq('is_active', true);
+
+      if (participantsError) throw participantsError;
+
+      // Filter players to only show those who are participants
+      const participantIds = participantsData?.map(p => p.player_id) || [];
+      const filteredPlayers = players.filter(player => participantIds.includes(player.id));
+      setLadderParticipants(filteredPlayers);
+    } catch (error) {
+      console.error('Error fetching ladder participants:', error);
+      setLadderParticipants([]);
     }
   };
 
@@ -274,20 +314,28 @@ export default function RecordMatchDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Player 1</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select player" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {players.map((player) => (
-                            <SelectItem key={player.id} value={player.id}>
-                              {getPlayerDisplayName(player)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {isAdmin ? (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select player" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ladderParticipants.map((player) => (
+                              <SelectItem key={player.id} value={player.id}>
+                                {getPlayerDisplayName(player)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm">
+                          {ladderParticipants.find(p => p.id === field.value)
+                            ? getPlayerDisplayName(ladderParticipants.find(p => p.id === field.value)!)
+                            : 'Loading...'}
+                        </div>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -306,7 +354,7 @@ export default function RecordMatchDialog({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {players.map((player) => (
+                          {ladderParticipants.map((player) => (
                             <SelectItem key={player.id} value={player.id}>
                               {getPlayerDisplayName(player)}
                             </SelectItem>

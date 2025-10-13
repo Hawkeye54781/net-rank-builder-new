@@ -4,10 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Trophy, Users, Calendar, UserCircle2, Plus } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Calendar, UserCircle2, Plus, UserPlus, Loader2 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import RecordMatchDialog from '@/components/RecordMatchDialog';
+import { useClubAdmin } from '@/hooks/useClubAdmin';
+import { useLadderParticipation } from '@/hooks/useLadderParticipation';
 
 interface Ladder {
   id: string;
@@ -50,11 +52,24 @@ export default function LadderDetails() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [userProfileId, setUserProfileId] = useState<string | null>(null);
+  const [isUserParticipant, setIsUserParticipant] = useState(false);
+  const { isAdmin } = useClubAdmin(user, ladder?.club_id || null);
+  const { joinLadder, isJoining } = useLadderParticipation(id || '', userProfileId);
 
   useEffect(() => {
     fetchLadderDetails();
     fetchCurrentUser();
   }, [id]);
+
+  // Re-check participation when user profile ID changes
+  useEffect(() => {
+    if (userProfileId && participants.length > 0) {
+      const isParticipant = participants.some(
+        (p) => p.player_id === userProfileId
+      );
+      setIsUserParticipant(isParticipant);
+    }
+  }, [userProfileId, participants]);
 
   const fetchCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -118,6 +133,14 @@ export default function LadderDetails() {
 
       if (participantsError) throw participantsError;
       setParticipants(participantsData || []);
+
+      // Check if current user is a participant
+      if (userProfileId) {
+        const isParticipant = participantsData?.some(
+          (p) => p.player_id === userProfileId
+        ) || false;
+        setIsUserParticipant(isParticipant);
+      }
 
     } catch (error) {
       console.error('Error fetching ladder details:', error);
@@ -253,12 +276,32 @@ export default function LadderDetails() {
               </div>
               {user && userProfileId && ladder.is_active && (
                 <div className="flex-shrink-0">
-                  <RecordMatchDialog
-                    clubId={ladder.club_id}
-                    currentPlayerId={userProfileId}
-                    defaultLadderId={ladder.id}
-                    onMatchRecorded={fetchLadderDetails}
-                  />
+                  {isUserParticipant || isAdmin ? (
+                    <RecordMatchDialog
+                      clubId={ladder.club_id}
+                      currentPlayerId={userProfileId}
+                      defaultLadderId={ladder.id}
+                      onMatchRecorded={fetchLadderDetails}
+                      isAdmin={isAdmin}
+                    />
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="bg-gradient-court hover:bg-primary-light h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm"
+                      onClick={async () => {
+                        await joinLadder();
+                        await fetchLadderDetails();
+                      }}
+                      disabled={isJoining}
+                    >
+                      {isJoining ? (
+                        <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
+                      ) : (
+                        <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                      )}
+                      {isJoining ? 'Joining...' : 'Join Ladder'}
+                    </Button>
+                  )}
                 </div>
               )}
             </div>

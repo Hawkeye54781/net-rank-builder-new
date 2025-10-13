@@ -5,10 +5,11 @@ import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Trophy, Users, Activity, TrendingUp, Calendar, Award, LogOut } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Activity, TrendingUp, Calendar, Award, LogOut, Info } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import MatchList from '@/components/MatchList';
 import RecordMatchDialog from '@/components/RecordMatchDialog';
+import { useClubAdmin } from '@/hooks/useClubAdmin';
 
 interface Profile {
   id: string;
@@ -55,6 +56,7 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
   const [loading, setLoading] = useState(true);
   const [matchRefreshTrigger, setMatchRefreshTrigger] = useState(0);
   const [activeView, setActiveView] = useState<ProfileViewType>('matches');
+  const { isAdmin } = useClubAdmin(user, profile?.club_id || null);
 
   useEffect(() => {
     fetchUserProfile();
@@ -318,23 +320,36 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
           {activeView === 'matches' && (
             <Card>
               <CardHeader>
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <CardTitle>Recent Matches</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-base sm:text-lg">Recent Matches</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
                       Your match history and results
                     </CardDescription>
                   </div>
-                  <div className="flex-shrink-0">
-                    <RecordMatchDialog
-                      clubId={profile.club_id}
-                      currentPlayerId={profile.id}
-                      onMatchRecorded={() => {
-                        fetchUserProfile();
-                        setMatchRefreshTrigger(prev => prev + 1);
-                      }}
-                    />
-                  </div>
+                  {(participatingLadders.length > 0 || isAdmin) ? (
+                    <div className="flex-shrink-0 w-full sm:w-auto">
+                      <RecordMatchDialog
+                        clubId={profile.club_id}
+                        currentPlayerId={profile.id}
+                        onMatchRecorded={() => {
+                          fetchUserProfile();
+                          setMatchRefreshTrigger(prev => prev + 1);
+                        }}
+                        isAdmin={isAdmin}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full sm:w-auto">
+                      <div className="flex items-start gap-2 p-3 sm:p-2 bg-muted/50 rounded-lg border border-muted">
+                        <Info className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                        <p className="text-xs sm:text-sm text-muted-foreground">
+                          <span className="font-medium block sm:inline">Join a ladder</span>
+                          <span className="hidden sm:inline"> to record matches</span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
