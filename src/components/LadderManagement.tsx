@@ -42,7 +42,9 @@ interface LadderManagementProps {
 export default function LadderManagement({ ladders, onLadderUpdated }: LadderManagementProps) {
   const [deletingLadderId, setDeletingLadderId] = useState<string | null>(null);
   const [togglingLadderId, setTogglingLadderId] = useState<string | null>(null);
-  const [editingLadderId, setEditingLadderId] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedLadder, setSelectedLadder] = useState<Ladder | null>(null);
   const { toast } = useToast();
 
   const handleToggleActive = async (ladder: Ladder) => {
@@ -125,6 +127,42 @@ export default function LadderManagement({ ladders, onLadderUpdated }: LadderMan
   }
 
   return (
+    <>
+      <EditLadderDialog
+        ladderId={selectedLadder?.id || ''}
+        currentName={selectedLadder?.name || ''}
+        onLadderUpdated={onLadderUpdated}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
+      
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Ladder</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{selectedLadder?.name}"? This action cannot be
+              undone and will remove all associated matches and rankings.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (selectedLadder) {
+                  handleDeleteLadder(selectedLadder.id, selectedLadder.name);
+                  setDeleteDialogOpen(false);
+                }
+              }}
+              className="bg-destructive hover:bg-destructive/90"
+              disabled={deletingLadderId === selectedLadder?.id}
+            >
+              {deletingLadderId === selectedLadder?.id ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
     <div className="space-y-3">
       {ladders.map((ladder) => (
         <div
@@ -146,19 +184,16 @@ export default function LadderManagement({ ladders, onLadderUpdated }: LadderMan
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <EditLadderDialog
-                  ladderId={ladder.id}
-                  currentName={ladder.name}
-                  onLadderUpdated={onLadderUpdated}
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onSelect={() => {
+                    setSelectedLadder(ladder);
+                    setEditDialogOpen(true);
+                  }}
                 >
-                  <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
-                    className="cursor-pointer"
-                  >
-                    <Edit2 className="mr-2 h-4 w-4" />
-                    Rename Ladder
-                  </DropdownMenuItem>
-                </EditLadderDialog>
+                  <Edit2 className="mr-2 h-4 w-4" />
+                  Rename Ladder
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => handleToggleActive(ladder)}
                   disabled={togglingLadderId === ladder.id}
@@ -177,36 +212,16 @@ export default function LadderManagement({ ladders, onLadderUpdated }: LadderMan
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem
-                      onSelect={(e) => e.preventDefault()}
-                      className="text-destructive focus:text-destructive cursor-pointer"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete Ladder
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Ladder</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete "{ladder.name}"? This action cannot be
-                        undone and will remove all associated matches and rankings.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDeleteLadder(ladder.id, ladder.name)}
-                        className="bg-destructive hover:bg-destructive/90"
-                        disabled={deletingLadderId === ladder.id}
-                      >
-                        {deletingLadderId === ladder.id ? 'Deleting...' : 'Delete'}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive cursor-pointer"
+                  onSelect={() => {
+                    setSelectedLadder(ladder);
+                    setDeleteDialogOpen(true);
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Ladder
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -237,5 +252,6 @@ export default function LadderManagement({ ladders, onLadderUpdated }: LadderMan
         </div>
       ))}
     </div>
+    </>
   );
 }
