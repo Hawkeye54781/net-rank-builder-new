@@ -424,10 +424,13 @@ export default function RecordMatchDialog({
               <FormField
                 control={form.control}
                 name="matchDate"
-                render={({ field }) => (
+                render={({ field }) => {
+                  const [datePickerOpen, setDatePickerOpen] = useState(false);
+                  
+                  return (
                     <FormItem className="flex flex-col">
                     <FormLabel className="text-sm mb-2">Match Date</FormLabel>
-                    <Popover>
+                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -450,7 +453,12 @@ export default function RecordMatchDialog({
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            if (date) {
+                              field.onChange(date);
+                              setDatePickerOpen(false);
+                            }
+                          }}
                           disabled={(date) =>
                             date > new Date() || date < new Date('1900-01-01')
                           }
@@ -463,7 +471,8 @@ export default function RecordMatchDialog({
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
-                )}
+                  );
+                }}
               />
 
               <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-6">

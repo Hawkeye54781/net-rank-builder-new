@@ -36,6 +36,8 @@ interface EditLadderDialogProps {
   currentName: string;
   onLadderUpdated: () => void;
   children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -47,10 +49,15 @@ export default function EditLadderDialog({
   currentName,
   onLadderUpdated,
   children,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: EditLadderDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  
+  const open = externalOpen ?? internalOpen;
+  const setOpen = externalOnOpenChange ?? setInternalOpen;
 
   const form = useForm<EditLadderFormData>({
     resolver: zodResolver(editLadderSchema),
@@ -99,18 +106,20 @@ export default function EditLadderDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 sm:h-9 sm:w-9"
-            title="Edit ladder name"
-          >
-            <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </Button>
-        )}
-      </DialogTrigger>
+      {externalOpen === undefined && (
+        <DialogTrigger asChild>
+          {children || (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 sm:h-9 sm:w-9"
+              title="Edit ladder name"
+            >
+              <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="pb-4">
           <DialogTitle className="text-lg sm:text-xl">Edit Ladder</DialogTitle>

@@ -27,6 +27,18 @@ export function useRecordMatch() {
   const { toast } = useToast();
 
   /**
+   * Format date to YYYY-MM-DD in local timezone (avoids timezone shift issues)
+   * @param date - Date object to format
+   * @returns Date string in YYYY-MM-DD format
+   */
+  const formatDateLocal = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  /**
    * Calculate ELO rating change based on match outcome
    * @param playerRating - Current ELO rating of the player
    * @param opponentRating - Current ELO rating of the opponent
@@ -100,6 +112,23 @@ export function useRecordMatch() {
         throw new Error(`${missingPlayers.join(' and ')} must join this ladder before recording a match`);
       }
 
+      // Check for duplicate matches (same date, players, and scores)
+      const matchDateStr = formatDateLocal(params.matchDate);
+      const { data: existingMatches, error: duplicateError } = await supabase
+        .from('matches')
+        .select('id')
+        .eq('ladder_id', params.ladderId)
+        .eq('match_date', matchDateStr)
+        .or(`and(player1_id.eq.${params.player1Id},player2_id.eq.${params.player2Id}),and(player1_id.eq.${params.player2Id},player2_id.eq.${params.player1Id})`)
+        .eq('player1_score', params.player1Score)
+        .eq('player2_score', params.player2Score);
+
+      if (duplicateError) throw duplicateError;
+
+      if (existingMatches && existingMatches.length > 0) {
+        throw new Error('This match has already been recorded. Duplicate matches are not allowed.');
+      }
+
       // Fetch current player data
       const [player1, player2] = await Promise.all([
         fetchPlayerData(params.player1Id),
@@ -142,7 +171,7 @@ export function useRecordMatch() {
           player2_elo_before: player2.elo_rating,
           player1_elo_after: player1EloAfter,
           player2_elo_after: player2EloAfter,
-          match_date: params.matchDate.toISOString().split('T')[0],
+          match_date: formatDateLocal(params.matchDate),
         },
       ]);
 
