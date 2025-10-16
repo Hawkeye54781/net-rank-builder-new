@@ -15,9 +15,12 @@ interface Profile {
   id: string;
   first_name: string;
   last_name: string;
-  elo_rating: number;
-  matches_played: number;
-  matches_won: number;
+  singles_elo: number;
+  doubles_elo: number;
+  singles_matches_played: number;
+  singles_matches_won: number;
+  doubles_matches_played: number;
+  doubles_matches_won: number;
   club_id: string;
   created_at: string;
 }
@@ -84,12 +87,12 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
       if (clubError) throw clubError;
       setClub(clubData);
 
-      // Get club rankings to calculate user rank
+      // Get club rankings to calculate user rank (using singles ELO as primary ranking)
       const { data: rankingsData, error: rankingsError } = await supabase
         .from('profiles')
-        .select('id, elo_rating')
+        .select('id, singles_elo')
         .eq('club_id', profileData.club_id)
-        .order('elo_rating', { ascending: false });
+        .order('singles_elo', { ascending: false});
 
       if (rankingsError) throw rankingsError;
       
@@ -226,12 +229,12 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <Card className="shadow-card-tennis">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">ELO Rating</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">Singles ELO</CardTitle>
               <TrendingUp className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-xl sm:text-2xl font-bold text-primary">
-                {profile.elo_rating}
+                {profile.singles_elo}
               </div>
               <p className="text-xs text-muted-foreground">
                 Rank #{clubRank}
@@ -241,30 +244,45 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
 
           <Card className="shadow-card-tennis">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Matches</CardTitle>
-              <Activity className="h-4 w-4 text-primary" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Doubles ELO</CardTitle>
+              <TrendingUp className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">
-                {profile.matches_played}
+              <div className="text-xl sm:text-2xl font-bold text-primary">
+                {profile.doubles_elo}
               </div>
               <p className="text-xs text-muted-foreground">
-                Total played
+                {profile.doubles_matches_played} {profile.doubles_matches_played === 1 ? 'match' : 'matches'}
               </p>
             </CardContent>
           </Card>
 
           <Card className="shadow-card-tennis">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Win Rate</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">Singles</CardTitle>
+              <Activity className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl sm:text-2xl font-bold">
+                {profile.singles_matches_won}W
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {profile.singles_matches_played - profile.singles_matches_won}L · {profile.singles_matches_played} total
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card-tennis">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Doubles</CardTitle>
               <Trophy className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-xl sm:text-2xl font-bold">
-                {winRate}%
+                {profile.doubles_matches_won}W
               </div>
               <p className="text-xs text-muted-foreground">
-                {profile.matches_won}W - {lossCount}L
+                {profile.doubles_matches_played - profile.doubles_matches_won}L · {profile.doubles_matches_played} total
               </p>
             </CardContent>
           </Card>
@@ -327,7 +345,7 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
                       Your match history and results
                     </CardDescription>
                   </div>
-                  {(participatingLadders.length > 0 || isAdmin) ? (
+                  {participatingLadders.length > 0 ? (
                     <div className="flex-shrink-0 w-full sm:w-auto">
                       <RecordMatchDialog
                         clubId={profile.club_id}

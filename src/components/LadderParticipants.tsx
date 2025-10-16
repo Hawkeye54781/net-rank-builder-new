@@ -29,9 +29,12 @@ interface Profile {
   id: string;
   first_name: string;
   last_name: string;
-  elo_rating: number;
-  matches_played: number;
-  matches_won: number;
+  singles_elo: number;
+  doubles_elo: number;
+  singles_matches_played: number;
+  singles_matches_won: number;
+  doubles_matches_played: number;
+  doubles_matches_won: number;
 }
 
 interface ParticipantWithProfile {
@@ -46,6 +49,7 @@ interface ParticipantWithProfile {
 interface LadderParticipantsProps {
   ladderId: string;
   ladderName: string;
+  ladderType: string;
   isClubAdmin: boolean;
 }
 
@@ -56,6 +60,7 @@ interface LadderParticipantsProps {
 export default function LadderParticipants({
   ladderId,
   ladderName,
+  ladderType,
   isClubAdmin,
 }: LadderParticipantsProps) {
   const [participants, setParticipants] = useState<ParticipantWithProfile[]>([]);
@@ -95,9 +100,12 @@ export default function LadderParticipants({
             id,
             first_name,
             last_name,
-            elo_rating,
-            matches_played,
-            matches_won
+            singles_elo,
+            doubles_elo,
+            singles_matches_played,
+            singles_matches_won,
+            doubles_matches_played,
+            doubles_matches_won
           )
         `)
         .eq('ladder_id', ladderId)
@@ -195,31 +203,36 @@ export default function LadderParticipants({
             </div>
           ) : (
             <div className="space-y-3">
-              {participants.map((participant, index) => (
-                <div
-                  key={participant.id}
-                  className="flex items-center justify-between p-3 border rounded-lg bg-card"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <h4 className="font-medium">
-                        {participant.profile.first_name} {participant.profile.last_name}
-                      </h4>
-                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                        <span>ELO: {participant.profile.elo_rating}</span>
-                        <span>•</span>
-                        <span>{participant.profile.matches_played} matches</span>
-                        <span>•</span>
-                        <div className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          Joined {formatDistanceToNow(new Date(participant.joined_at))} ago
+              {participants.map((participant, index) => {
+                const isDoubles = ladderType === 'doubles' || ladderType === 'mixed';
+                const currentElo = isDoubles ? participant.profile.doubles_elo : participant.profile.singles_elo;
+                const matchesPlayed = isDoubles ? participant.profile.doubles_matches_played : participant.profile.singles_matches_played;
+                
+                return (
+                  <div
+                    key={participant.id}
+                    className="flex items-center justify-between p-3 border rounded-lg bg-card"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <h4 className="font-medium">
+                          {participant.profile.first_name} {participant.profile.last_name}
+                        </h4>
+                        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                          <span>ELO: {currentElo}</span>
+                          <span>•</span>
+                          <span>{matchesPlayed} matches</span>
+                          <span>•</span>
+                          <div className="flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            Joined {formatDistanceToNow(new Date(participant.joined_at))} ago
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
                   {isClubAdmin && (
                     <AlertDialog>
@@ -269,9 +282,10 @@ export default function LadderParticipants({
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

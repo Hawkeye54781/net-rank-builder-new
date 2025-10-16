@@ -18,9 +18,10 @@ interface Profile {
   id: string;
   first_name: string;
   last_name: string;
-  elo_rating: number;
-  matches_played: number;
-  matches_won: number;
+  singles_elo: number;
+  doubles_elo: number;
+  singles_matches_played: number;
+  singles_matches_won: number;
   club_id: string;
 }
 
@@ -118,12 +119,12 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
       if (allLaddersError) throw allLaddersError;
       setAllLadders(allLaddersData || []);
 
-      // Fetch club rankings
+      // Fetch club rankings (based on singles ELO)
       const { data: rankingsData, error: rankingsError } = await supabase
         .from('profiles')
         .select('*')
         .eq('club_id', profileData.club_id)
-        .order('elo_rating', { ascending: false })
+        .order('singles_elo', { ascending: false })
         .limit(10);
 
       if (rankingsError) throw rankingsError;
@@ -285,8 +286,8 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
               <CardContent>
                 <div className="space-y-3">
                   {rankings.map((player, index) => {
-                    const winRate = player.matches_played > 0
-                      ? ((player.matches_won / player.matches_played) * 100).toFixed(1)
+                    const winRate = player.singles_matches_played > 0
+                      ? ((player.singles_matches_won / player.singles_matches_played) * 100).toFixed(1)
                       : '0';
                     
                     return (
@@ -308,16 +309,16 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                               )}
                             </div>
                             <p className="text-xs sm:text-sm text-muted-foreground">
-                              {player.matches_played} {player.matches_played === 1 ? 'match' : 'matches'} played
+                              {player.singles_matches_played} singles {player.singles_matches_played === 1 ? 'match' : 'matches'}
                             </p>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
                           <div className="font-bold text-lg sm:text-xl text-primary">
-                            {player.elo_rating}
+                            {player.singles_elo}
                           </div>
                           <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                            {player.matches_played > 0 ? `${winRate}% win` : 'No matches'}
+                            {player.singles_matches_played > 0 ? `${winRate}% win` : 'No matches'}
                           </div>
                         </div>
                       </div>

@@ -24,9 +24,12 @@ interface Profile {
   id: string;
   first_name: string;
   last_name: string;
-  elo_rating: number;
-  matches_played: number;
-  matches_won: number;
+  singles_elo: number;
+  doubles_elo: number;
+  singles_matches_played: number;
+  singles_matches_won: number;
+  doubles_matches_played: number;
+  doubles_matches_won: number;
 }
 
 interface LadderParticipant {
@@ -112,6 +115,7 @@ export default function LadderDetails() {
       setClub(clubData);
 
       // Fetch participants with their profiles
+      const isDoubles = ladderData.type === 'doubles' || ladderData.type === 'mixed';
       const { data: participantsData, error: participantsError } = await supabase
         .from('ladder_participants')
         .select(`
@@ -123,13 +127,16 @@ export default function LadderDetails() {
             id,
             first_name,
             last_name,
-            elo_rating,
-            matches_played,
-            matches_won
+            singles_elo,
+            doubles_elo,
+            singles_matches_played,
+            singles_matches_won,
+            doubles_matches_played,
+            doubles_matches_won
           )
         `)
         .eq('ladder_id', id)
-        .order('profiles(elo_rating)', { ascending: false });
+        .order(isDoubles ? 'profiles(doubles_elo)' : 'profiles(singles_elo)', { ascending: false });
 
       if (participantsError) throw participantsError;
       setParticipants(participantsData || []);
@@ -276,7 +283,7 @@ export default function LadderDetails() {
               </div>
               {user && userProfileId && ladder.is_active && (
                 <div className="flex-shrink-0">
-                  {isUserParticipant || isAdmin ? (
+                  {isUserParticipant ? (
                     <RecordMatchDialog
                       clubId={ladder.club_id}
                       currentPlayerId={userProfileId}
@@ -311,8 +318,12 @@ export default function LadderDetails() {
               <div className="space-y-3">
                 {participants.map((participant, index) => {
                   const profile = participant.profiles;
-                  const winRate = profile.matches_played > 0
-                    ? ((profile.matches_won / profile.matches_played) * 100).toFixed(1)
+                  const isDoubles = ladder.type === 'doubles' || ladder.type === 'mixed';
+                  const currentElo = isDoubles ? profile.doubles_elo : profile.singles_elo;
+                  const matchesPlayed = isDoubles ? profile.doubles_matches_played : profile.singles_matches_played;
+                  const matchesWon = isDoubles ? profile.doubles_matches_won : profile.singles_matches_won;
+                  const winRate = matchesPlayed > 0
+                    ? ((matchesWon / matchesPlayed) * 100).toFixed(1)
                     : '0';
 
                   return (
@@ -329,16 +340,16 @@ export default function LadderDetails() {
                             {profile.first_name} {profile.last_name}
                           </h3>
                           <p className="text-xs sm:text-sm text-muted-foreground">
-                            {profile.matches_played} {profile.matches_played === 1 ? 'match' : 'matches'} played
+                            {matchesPlayed} {matchesPlayed === 1 ? 'match' : 'matches'} played
                           </p>
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
                         <div className="font-bold text-lg sm:text-xl text-primary">
-                          {profile.elo_rating}
+                          {currentElo}
                         </div>
                         <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                          {profile.matches_played > 0
+                          {matchesPlayed > 0
                             ? `${winRate}% win`
                             : 'No matches'}
                         </div>

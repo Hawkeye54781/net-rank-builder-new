@@ -245,6 +245,7 @@ export default function LadderManagement({ ladders, onLadderUpdated }: LadderMan
               <LadderParticipants
                 ladderId={ladder.id}
                 ladderName={ladder.name}
+                ladderType={ladder.type}
                 isClubAdmin={true}
               />
             )}

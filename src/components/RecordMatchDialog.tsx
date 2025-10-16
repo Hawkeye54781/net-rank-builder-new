@@ -40,13 +40,15 @@ import { cn } from '@/lib/utils';
 interface Ladder {
   id: string;
   name: string;
+  type: string;
 }
 
 interface Player {
   id: string;
   first_name: string;
   last_name: string;
-  elo_rating: number;
+  singles_elo: number;
+  doubles_elo: number;
 }
 
 /**
@@ -94,6 +96,8 @@ const recordMatchSchema = z.object({
   ladderId: z.string().min(1, 'Please select a ladder'),
   player1Id: z.string().min(1, 'Please select Player 1'),
   player2Id: z.string().min(1, 'Please select Player 2'),
+  player1PartnerId: z.string().optional(),
+  player2PartnerId: z.string().optional(),
   player1Score: z.string().min(1, 'Please select Player 1 score'),
   player2Score: z.string().min(1, 'Please select Player 2 score'),
   matchDate: z.date({
@@ -104,6 +108,18 @@ const recordMatchSchema = z.object({
   {
     message: 'Players must be different',
     path: ['player2Id'],
+  }
+).refine(
+  (data) => !data.player1PartnerId || data.player1Id !== data.player1PartnerId,
+  {
+    message: 'Player and partner must be different',
+    path: ['player1PartnerId'],
+  }
+).refine(
+  (data) => !data.player2PartnerId || data.player2Id !== data.player2PartnerId,
+  {
+    message: 'Player and partner must be different',
+    path: ['player2PartnerId'],
   }
 );
 
@@ -141,6 +157,8 @@ export default function RecordMatchDialog({
       ladderId: defaultLadderId || '',
       player1Id: currentPlayerId,
       player2Id: '',
+      player1PartnerId: '',
+      player2PartnerId: '',
       player1Score: '',
       player2Score: '',
       matchDate: new Date(),
@@ -171,7 +189,7 @@ export default function RecordMatchDialog({
       // Fetch active ladders
       const { data: laddersData, error: laddersError } = await supabase
         .from('ladders')
-        .select('id, name')
+        .select('id, name, type')
         .eq('club_id', clubId)
         .eq('is_active', true)
         .order('name');
@@ -182,7 +200,7 @@ export default function RecordMatchDialog({
       // Fetch all players in the club
       const { data: playersData, error: playersError } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, elo_rating')
+        .select('id, first_name, last_name, singles_elo, doubles_elo')
         .eq('club_id', clubId)
         .order('first_name');
 
@@ -227,6 +245,8 @@ export default function RecordMatchDialog({
         ladderId: data.ladderId,
         player1Id: data.player1Id,
         player2Id: data.player2Id,
+        player1PartnerId: data.player1PartnerId || undefined,
+        player2PartnerId: data.player2PartnerId || undefined,
         player1Score: parseInt(data.player1Score),
         player2Score: parseInt(data.player2Score),
         matchDate: data.matchDate,
@@ -236,6 +256,8 @@ export default function RecordMatchDialog({
         ladderId: defaultLadderId || '',
         player1Id: currentPlayerId,
         player2Id: '',
+        player1PartnerId: '',
+        player2PartnerId: '',
         player1Score: '',
         player2Score: '',
         matchDate: new Date(),
@@ -256,7 +278,10 @@ export default function RecordMatchDialog({
   };
 
   const getPlayerDisplayName = (player: Player): string => {
-    return `${player.first_name} ${player.last_name} (${player.elo_rating})`;
+    const selectedLadder = ladders.find(l => l.id === selectedLadderId);
+    const isDoubles = selectedLadder?.type === 'doubles' || selectedLadder?.type === 'mixed';
+    const elo = isDoubles ? player.doubles_elo : player.singles_elo;
+    return `${player.first_name} ${player.last_name} (${elo})`;
   };
 
   return (
@@ -366,6 +391,64 @@ export default function RecordMatchDialog({
                   )}
                 />
               </div>
+
+              {/* Partner Selection for Doubles */}
+              {selectedLadderId && (
+                (ladders.find(l => l.id === selectedLadderId)?.type === 'doubles' ||
+                 ladders.find(l => l.id === selectedLadderId)?.type === 'mixed') && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="player1PartnerId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Player 1 Partner</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select partner" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {ladderParticipants.map((player) => (
+                                <SelectItem key={player.id} value={player.id}>
+                                  {getPlayerDisplayName(player)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="player2PartnerId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Player 2 Partner</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select partner" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {ladderParticipants.map((player) => (
+                                <SelectItem key={player.id} value={player.id}>
+                                  {getPlayerDisplayName(player)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )
+              )}
 
               <div>
                 <FormLabel className="mb-3 block text-sm">Match Score (Sets Won)</FormLabel>

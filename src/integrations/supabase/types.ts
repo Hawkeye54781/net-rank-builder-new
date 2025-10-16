@@ -261,6 +261,12 @@ export type Database = {
           matches_played: number
           matches_won: number
           phone: string | null
+          singles_elo: number
+          doubles_elo: number
+          singles_matches_played: number
+          singles_matches_won: number
+          doubles_matches_played: number
+          doubles_matches_won: number
           updated_at: string
           user_id: string
         }
@@ -275,6 +281,12 @@ export type Database = {
           matches_played?: number
           matches_won?: number
           phone?: string | null
+          singles_elo?: number
+          doubles_elo?: number
+          singles_matches_played?: number
+          singles_matches_won?: number
+          doubles_matches_played?: number
+          doubles_matches_won?: number
           updated_at?: string
           user_id: string
         }
@@ -289,6 +301,12 @@ export type Database = {
           matches_played?: number
           matches_won?: number
           phone?: string | null
+          singles_elo?: number
+          doubles_elo?: number
+          singles_matches_played?: number
+          singles_matches_won?: number
+          doubles_matches_played?: number
+          doubles_matches_won?: number
           updated_at?: string
           user_id?: string
         }
