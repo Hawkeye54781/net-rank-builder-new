@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { User, Session } from '@supabase/supabase-js';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Club {
   id: string;
@@ -28,6 +29,10 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
   const [phone, setPhone] = useState('');
   const [selectedClub, setSelectedClub] = useState('');
   const [clubs, setClubs] = useState<Club[]>([]);
+  const [createNewClub, setCreateNewClub] = useState(false);
+  const [clubName, setClubName] = useState('');
+  const [clubLocation, setClubLocation] = useState('');
+  const [billingAgreed, setBillingAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -76,7 +81,8 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedClub) {
+
+    if (!createNewClub && !selectedClub) {
       toast({
         title: "Club Required",
         description: "Please select your tennis club",
@@ -85,21 +91,44 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
       return;
     }
 
+    if (createNewClub) {
+      if (!clubName || !clubLocation) {
+        toast({
+          title: "Club Details Required",
+          description: "Please enter a club name and location",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!billingAgreed) {
+        toast({
+          title: "Billing Agreement Required",
+          description: "You must agree to the 7-day trial and subscription terms to create a club",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setLoading(true);
-    // Use environment variable for redirect URL to ensure production URLs work correctly
     const redirectUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+
+    // Prepare user metadata
+    const userMetadata: { first_name: string; last_name: string; phone: string; club_id?: string } = {
+      first_name: firstName,
+      last_name: lastName,
+      phone: phone,
+    };
+    if (!createNewClub) {
+      userMetadata.club_id = selectedClub;
+    }
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone,
-          club_id: selectedClub,
-        }
+        data: userMetadata,
       }
     });
 
@@ -123,21 +152,39 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
       return;
     }
 
-    // Profile is automatically created by database trigger
-    // No need to manually insert into profiles table
+    // If creating a new club and we have a session, call RPC to create the club and assign admin
+    if (createNewClub && data.session) {
+      const rpc = (supabase as unknown as {
+        rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>
+      }).rpc;
+      const { error: rpcError } = await rpc('create_club_and_assign_admin', {
+        p_name: clubName,
+        p_location: clubLocation,
+        p_billing_agreed: true,
+      });
+      if (rpcError) {
+        toast({
+          title: "Club Creation Failed",
+          description: rpcError.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+    }
 
-    // If email confirmation is disabled, user will be auto-logged in
     if (data.session) {
       toast({
         title: "Sign Up Successful",
-        description: "Welcome to Tennis Ladder!",
+        description: createNewClub ? "Club created. Welcome to Tennis Ladder!" : "Welcome to Tennis Ladder!",
       });
-      // Auto sign in the user
       onAuthSuccess(data.user, data.session);
     } else {
       toast({
         title: "Sign Up Successful",
-        description: "Please check your email to confirm your account",
+        description: createNewClub
+          ? "Please verify your email. After verifying, sign in and your club will be created."
+          : "Please check your email to confirm your account",
       });
     }
 
@@ -181,21 +228,60 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="club">Tennis Club</Label>
-                  <Select value={selectedClub} onValueChange={setSelectedClub} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your tennis club" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clubs.map((club) => (
-                        <SelectItem key={club.id} value={club.id}>
-                          {club.name} - {club.location}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+
+                {/* New club toggle */}
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="createNewClub" checked={createNewClub} onCheckedChange={(v) => setCreateNewClub(Boolean(v))} />
+                  <Label htmlFor="createNewClub" className="cursor-pointer">Create a new club</Label>
                 </div>
+
+                {!createNewClub ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="club">Tennis Club</Label>
+                    <Select value={selectedClub} onValueChange={setSelectedClub} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your tennis club" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clubs.map((club) => (
+                          <SelectItem key={club.id} value={club.id}>
+                            {club.name} - {club.location}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="clubName">Club Name</Label>
+                      <Input
+                        id="clubName"
+                        type="text"
+                        value={clubName}
+                        onChange={(e) => setClubName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="clubLocation">Club Location</Label>
+                      <Input
+                        id="clubLocation"
+                        type="text"
+                        value={clubLocation}
+                        onChange={(e) => setClubLocation(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <Checkbox id="billingAgreed" checked={billingAgreed} onCheckedChange={(v) => setBillingAgreed(Boolean(v))} />
+                      <Label htmlFor="billingAgreed" className="text-sm text-muted-foreground leading-5">
+                        I agree to start a 7-day free trial and to be responsible for the club subscription: €25/month for up to 150 users, and €45/month for more than 150 users.
+                      </Label>
+                    </div>
+                  </>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone (Optional)</Label>
                   <Input

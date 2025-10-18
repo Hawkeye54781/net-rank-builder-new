@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Session } from '@supabase/supabase-js';
-import { Trophy, Users, Settings, Shield, UserCircle2, LogOut } from 'lucide-react';
+import { Trophy, Users, Settings, Shield, UserCircle2, LogOut, CreditCard } from 'lucide-react';
 import { useClubAdmin } from '@/hooks/useClubAdmin';
 import AddLadderDialog from '@/components/AddLadderDialog';
 import LadderManagement from '@/components/LadderManagement';
@@ -28,6 +28,10 @@ interface Club {
   id: string;
   name: string;
   location: string;
+  trial_end_at?: string;
+  billing_status?: 'trialing' | 'active' | 'past_due' | 'canceled';
+  plan_tier?: 'basic' | 'plus';
+  user_seat_count?: number;
 }
 
 interface Ladder {
@@ -174,6 +178,17 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
               >
                 <UserCircle2 className="h-4 w-4" />
               </Button>
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate('/billing')}
+                  className="h-9 w-9"
+                  title="Billing"
+                >
+                  <CreditCard className="h-4 w-4" />
+                </Button>
+              )}
               <ThemeToggle />
               <Button 
                 variant="ghost" 
@@ -199,6 +214,12 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
       </header>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Trial banner */}
+        {club && club.billing_status && club.trial_end_at && club.billing_status !== 'active' && (
+          <div className="mb-4 p-3 border rounded-md bg-yellow-50 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-100">
+            Trial ends on {new Date(club.trial_end_at).toLocaleDateString()}.
+          </div>
+        )}
         {/* Segmented Control Navigation */}
         <div className="mb-6">
           <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-full w-full sm:w-auto">

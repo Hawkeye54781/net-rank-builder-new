@@ -1,0 +1,4 @@
+node_modules/
+dist/
+supabase/functions/**
+supabase/migrations/**
