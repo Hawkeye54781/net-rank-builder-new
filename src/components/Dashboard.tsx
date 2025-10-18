@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Session } from '@supabase/supabase-js';
-import { Trophy, Users, Settings, Shield, UserCircle2, LogOut } from 'lucide-react';
+import { Trophy, Users, Settings, Shield, UserCircle2, LogOut, Calendar } from 'lucide-react';
 import { useClubAdmin } from '@/hooks/useClubAdmin';
 import AddLadderDialog from '@/components/AddLadderDialog';
 import LadderManagement from '@/components/LadderManagement';
@@ -13,6 +13,7 @@ import ClubAdminManagement from '@/components/ClubAdminManagement';
 import LadderRow from '@/components/LadderRow';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useToast } from '@/hooks/use-toast';
+import BookingDashboard from '@/modules/booking/pages/BookingDashboard';
 
 interface Profile {
   id: string;
@@ -45,7 +46,7 @@ interface DashboardProps {
   onSignOut: () => void;
 }
 
-type ViewType = 'ladders' | 'rankings' | 'admin';
+type ViewType = 'ladders' | 'booking' | 'rankings' | 'admin';
 
 export default function Dashboard({ user, session, onSignOut }: DashboardProps) {
   const navigate = useNavigate();
@@ -215,6 +216,18 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
               <span className="hidden sm:inline ml-2">Ladders</span>
             </Button>
             <Button
+              variant={activeView === 'booking' ? 'default' : 'ghost'}
+              className={`rounded-full flex-1 sm:flex-none px-3 sm:px-6 py-2 transition-all ${
+                activeView === 'booking' 
+                  ? 'shadow-sm' 
+                  : 'hover:bg-background/50'
+              }`}
+              onClick={() => setActiveView('booking')}
+            >
+              <Calendar className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline ml-2">Booking</span>
+            </Button>
+            <Button
               variant={activeView === 'rankings' ? 'default' : 'ghost'}
               className={`rounded-full flex-1 sm:flex-none px-3 sm:px-6 py-2 transition-all ${
                 activeView === 'rankings' 
@@ -270,6 +283,24 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                     <p className="text-muted-foreground">No active ladders at your club yet.</p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeView === 'booking' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Court Booking</CardTitle>
+                <CardDescription>
+                  Reserve courts for your club
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <BookingDashboard
+                  clubId={profile?.club_id || ''}
+                  profileId={profile?.id || ''}
+                  isAdmin={isAdmin}
+                />
               </CardContent>
             </Card>
           )}

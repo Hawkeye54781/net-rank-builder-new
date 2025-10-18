@@ -5,11 +5,12 @@ import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Trophy, Users, Activity, TrendingUp, Calendar, Award, LogOut, Info } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Activity, TrendingUp, Calendar, Award, LogOut, Info, CalendarCheck } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import MatchList from '@/components/MatchList';
 import RecordMatchDialog from '@/components/RecordMatchDialog';
 import { useClubAdmin } from '@/hooks/useClubAdmin';
+import { MyBookings } from '@/modules/booking/components/MyBookings';
 
 interface Profile {
   id: string;
@@ -44,7 +45,7 @@ interface UserProfileProps {
   onSignOut: () => void;
 }
 
-type ProfileViewType = 'matches' | 'ladders';
+type ProfileViewType = 'matches' | 'ladders' | 'bookings';
 
 export default function UserProfile({ user, onSignOut }: UserProfileProps) {
   const navigate = useNavigate();
@@ -312,6 +313,18 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
               <Users className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline ml-2">My Ladders</span>
             </Button>
+            <Button
+              variant={activeView === 'bookings' ? 'default' : 'ghost'}
+              className={`rounded-full flex-1 sm:flex-none px-3 sm:px-6 py-2 transition-all ${
+                activeView === 'bookings' 
+                  ? 'shadow-sm' 
+                  : 'hover:bg-background/50'
+              }`}
+              onClick={() => setActiveView('bookings')}
+            >
+              <CalendarCheck className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline ml-2">My Bookings</span>
+            </Button>
           </div>
         </div>
 
@@ -413,6 +426,10 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
                 )}
               </CardContent>
             </Card>
+          )}
+
+          {activeView === 'bookings' && (
+            <MyBookings profileId={profile.id} />
           )}
         </div>
       </div>
