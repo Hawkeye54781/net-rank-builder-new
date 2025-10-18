@@ -409,6 +409,306 @@ export type Database = {
           },
         ]
       }
+      tournament_groups: {
+        Row: {
+          created_at: string
+          gender: Database["public"]["Enums"]["tournament_gender"]
+          id: string
+          level: string | null
+          match_type: Database["public"]["Enums"]["tournament_match_type"]
+          name: string
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          gender?: Database["public"]["Enums"]["tournament_gender"]
+          id?: string
+          level?: string | null
+          match_type?: Database["public"]["Enums"]["tournament_match_type"]
+          name: string
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          gender?: Database["public"]["Enums"]["tournament_gender"]
+          id?: string
+          level?: string | null
+          match_type?: Database["public"]["Enums"]["tournament_match_type"]
+          name?: string
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_groups_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_matches: {
+        Row: {
+          affects_elo: boolean
+          created_at: string
+          group_id: string
+          id: string
+          match_date: string
+          player1_elo_after: number
+          player1_elo_before: number
+          player1_id: string
+          player1_score: number
+          player2_elo_after: number
+          player2_elo_before: number
+          player2_id: string
+          player2_score: number
+          tournament_id: string
+          updated_at: string
+          winner_id: string | null
+        }
+        Insert: {
+          affects_elo?: boolean
+          created_at?: string
+          group_id: string
+          id?: string
+          match_date: string
+          player1_elo_after: number
+          player1_elo_before: number
+          player1_id: string
+          player1_score: number
+          player2_elo_after: number
+          player2_elo_before: number
+          player2_id: string
+          player2_score: number
+          tournament_id: string
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Update: {
+          affects_elo?: boolean
+          created_at?: string
+          group_id?: string
+          id?: string
+          match_date?: string
+          player1_elo_after?: number
+          player1_elo_before?: number
+          player1_id?: string
+          player1_score?: number
+          player2_elo_after?: number
+          player2_elo_before?: number
+          player2_id?: string
+          player2_score?: number
+          tournament_id?: string
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_matches_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_matches_player1_id_fkey"
+            columns: ["player1_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_matches_player2_id_fkey"
+            columns: ["player2_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_matches_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_matches_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_participants: {
+        Row: {
+          created_at: string
+          group_id: string
+          guest_deleted_at: string | null
+          guest_name: string | null
+          id: string
+          is_guest: boolean
+          player_id: string
+          tournament_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          guest_deleted_at?: string | null
+          guest_name?: string | null
+          id?: string
+          is_guest?: boolean
+          player_id: string
+          tournament_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          guest_deleted_at?: string | null
+          guest_name?: string | null
+          id?: string
+          is_guest?: boolean
+          player_id?: string
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_participants_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_participants_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_participants_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_winners: {
+        Row: {
+          bonus_elo_awarded: number
+          created_at: string
+          final_standing: number
+          group_id: string
+          id: string
+          match_losses: number
+          match_wins: number
+          player_id: string
+          sets_lost: number
+          sets_won: number
+          tournament_id: string
+        }
+        Insert: {
+          bonus_elo_awarded: number
+          created_at?: string
+          final_standing: number
+          group_id: string
+          id?: string
+          match_losses?: number
+          match_wins?: number
+          player_id: string
+          sets_lost?: number
+          sets_won?: number
+          tournament_id: string
+        }
+        Update: {
+          bonus_elo_awarded?: number
+          created_at?: string
+          final_standing?: number
+          group_id?: string
+          id?: string
+          match_losses?: number
+          match_wins?: number
+          player_id?: string
+          sets_lost?: number
+          sets_won?: number
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_winners_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_winners_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_winners_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournaments: {
+        Row: {
+          club_id: string
+          created_at: string
+          end_date: string
+          format: Database["public"]["Enums"]["tournament_format"]
+          id: string
+          name: string
+          start_date: string
+          status: Database["public"]["Enums"]["tournament_status"]
+          updated_at: string
+          winner_bonus_elo: number
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          end_date: string
+          format?: Database["public"]["Enums"]["tournament_format"]
+          id?: string
+          name: string
+          start_date: string
+          status?: Database["public"]["Enums"]["tournament_status"]
+          updated_at?: string
+          winner_bonus_elo?: number
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          end_date?: string
+          format?: Database["public"]["Enums"]["tournament_format"]
+          id?: string
+          name?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["tournament_status"]
+          updated_at?: string
+          winner_bonus_elo?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournaments_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -421,6 +721,10 @@ export type Database = {
     }
     Enums: {
       app_role: "club_admin" | "user"
+      tournament_format: "round_robin"
+      tournament_status: "draft" | "active" | "completed"
+      tournament_gender: "mens" | "womens" | "mixed"
+      tournament_match_type: "singles" | "doubles"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -549,6 +853,10 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["club_admin", "user"],
+      tournament_format: ["round_robin"],
+      tournament_status: ["draft", "active", "completed"],
+      tournament_gender: ["mens", "womens", "mixed"],
+      tournament_match_type: ["singles", "doubles"],
     },
   },
 } as const

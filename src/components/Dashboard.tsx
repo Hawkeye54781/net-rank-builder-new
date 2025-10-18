@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Session } from '@supabase/supabase-js';
-import { Trophy, Users, Settings, Shield, UserCircle2, LogOut } from 'lucide-react';
+import { Trophy, Users, Settings, Shield, UserCircle2, LogOut, Target } from 'lucide-react';
 import { useClubAdmin } from '@/hooks/useClubAdmin';
 import AddLadderDialog from '@/components/AddLadderDialog';
 import LadderManagement from '@/components/LadderManagement';
 import ClubAdminManagement from '@/components/ClubAdminManagement';
 import LadderRow from '@/components/LadderRow';
+import TournamentManagement from '@/components/TournamentManagement';
+import AddTournamentDialog from '@/components/AddTournamentDialog';
+import UserTournamentsList from '@/components/UserTournamentsList';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useToast } from '@/hooks/use-toast';
 
@@ -45,7 +48,7 @@ interface DashboardProps {
   onSignOut: () => void;
 }
 
-type ViewType = 'ladders' | 'rankings' | 'admin';
+type ViewType = 'ladders' | 'tournaments' | 'rankings' | 'admin';
 
 export default function Dashboard({ user, session, onSignOut }: DashboardProps) {
   const navigate = useNavigate();
@@ -215,6 +218,18 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
               <span className="hidden sm:inline ml-2">Ladders</span>
             </Button>
             <Button
+              variant={activeView === 'tournaments' ? 'default' : 'ghost'}
+              className={`rounded-full flex-1 sm:flex-none px-3 sm:px-6 py-2 transition-all ${
+                activeView === 'tournaments' 
+                  ? 'shadow-sm' 
+                  : 'hover:bg-background/50'
+              }`}
+              onClick={() => setActiveView('tournaments')}
+            >
+              <Target className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline ml-2">Tournaments</span>
+            </Button>
+            <Button
               variant={activeView === 'rankings' ? 'default' : 'ghost'}
               className={`rounded-full flex-1 sm:flex-none px-3 sm:px-6 py-2 transition-all ${
                 activeView === 'rankings' 
@@ -270,6 +285,23 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                     <p className="text-muted-foreground">No active ladders at your club yet.</p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeView === 'tournaments' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>My Tournaments</CardTitle>
+                <CardDescription>
+                  View tournaments you're participating in
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <UserTournamentsList
+                  userId={profile?.id || ''}
+                  clubId={profile?.club_id || ''}
+                />
               </CardContent>
             </Card>
           )}
@@ -352,6 +384,32 @@ export default function Dashboard({ user, session, onSignOut }: DashboardProps) 
                   <LadderManagement
                     ladders={allLadders}
                     onLadderUpdated={fetchUserData}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <CardTitle className="flex items-center gap-2 mb-2">
+                        <Trophy className="h-5 w-5" />
+                        Tournament Management
+                      </CardTitle>
+                      <CardDescription>
+                        Create and manage tournaments for your club
+                      </CardDescription>
+                    </div>
+                    <AddTournamentDialog
+                      clubId={profile?.club_id || ''}
+                      onTournamentAdded={fetchUserData}
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <TournamentManagement
+                    clubId={profile?.club_id || ''}
+                    onTournamentUpdated={fetchUserData}
                   />
                 </CardContent>
               </Card>
